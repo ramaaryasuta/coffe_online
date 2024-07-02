@@ -1,5 +1,7 @@
-import 'package:coffeonline/styles/colors.dart';
 import 'package:flutter/material.dart';
+
+import '../../login/login_screen.dart';
+import '../../../styles/colors.dart';
 
 class MenuContainer extends StatelessWidget {
   const MenuContainer({
@@ -41,7 +43,11 @@ class MenuContainer extends StatelessWidget {
           MenuButton(
             icon: Icons.person_2_rounded,
             title: 'Profil',
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return const LoginScreen();
+              }));
+            },
           ),
         ],
       ),
