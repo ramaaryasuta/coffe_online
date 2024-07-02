@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'widgets/button_order.dart';
 import 'widgets/header_user.dart';
+import 'widgets/main_search_coffe.dart';
 import 'widgets/menu_container.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,13 +11,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Column(
-        children: [
-          HeaderUserAccount(),
-          MenuContainer(),
-          Spacer(),
-          OrderButton(),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            HeaderUserAccount(),
+            MenuContainer(),
+            SearchCoffe(),
+            OrderButton(),
+          ],
+        ),
       ),
     );
   }

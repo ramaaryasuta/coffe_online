@@ -8,21 +8,22 @@ class HeaderUserAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.only(top: 20),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       child: Row(
         children: [
           const CircleAvatar(
-            radius: 24,
+            radius: 30,
             backgroundImage: NetworkImage(
                 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg'),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 20),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Hallo, User!',
-                  style: Theme.of(context).textTheme.titleMedium),
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 5),
               Text('Mau Ngopi Kapan nih?',
                   style: Theme.of(context).textTheme.bodySmall),
             ],
@@ -30,7 +31,7 @@ class HeaderUserAccount extends StatelessWidget {
           const Spacer(),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications),
+            icon: const Icon(Icons.help),
           ),
         ],
       ),

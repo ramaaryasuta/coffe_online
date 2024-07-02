@@ -1,3 +1,4 @@
+import 'package:coffeonline/styles/colors.dart';
 import 'package:flutter/material.dart';
 
 class MenuContainer extends StatelessWidget {
@@ -8,29 +9,38 @@ class MenuContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: MyColor.primaryColor.withOpacity(0.3),
+            offset: const Offset(2, 4),
+            blurRadius: 5,
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        alignment: WrapAlignment.spaceBetween,
         children: [
           MenuButton(
-            icon: Icons.coffee_outlined,
-            title: 'Pedagang',
+            icon: Icons.coffee_rounded,
+            title: 'Berdagang',
             onTap: () {},
           ),
           MenuButton(
-            icon: Icons.history,
+            icon: Icons.history_rounded,
             title: 'Riwayat',
             onTap: () {},
           ),
           MenuButton(
-            icon: Icons.person_2_outlined,
-            title: 'Pedagang',
+            icon: Icons.person_2_rounded,
+            title: 'Profil',
             onTap: () {},
           ),
         ],
@@ -53,15 +63,29 @@ class MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Icon(icon),
-          const SizedBox(height: 10),
-          Text(title, style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ),
+    return Column(
+      children: [
+        Container(
+          height: 60,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.black26)),
+          child: ElevatedButton(
+            onPressed: onTap,
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: const BeveledRectangleBorder()),
+            child: Icon(
+              icon,
+              color: MyColor.primaryColor,
+              size: 30,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(title, style: Theme.of(context).textTheme.bodySmall),
+      ],
     );
   }
 }
