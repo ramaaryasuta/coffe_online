@@ -1,6 +1,10 @@
+import 'package:coffeonline/screens/home/provider/order_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../styles/colors.dart';
+import '../../../utils/print_log.dart';
+import '../../login/provider/auth_service.dart';
 
 class OrderButton extends StatefulWidget {
   const OrderButton({
@@ -13,15 +17,17 @@ class OrderButton extends StatefulWidget {
 
 class _OrderButtonState extends State<OrderButton> {
   final formKey = GlobalKey<FormState>();
-  final jumlahController = TextEditingController();
+  final amountController = TextEditingController();
   final budgetController = TextEditingController();
-  final catatanController = TextEditingController();
+  final addressController = TextEditingController();
+  final noteController = TextEditingController();
 
   @override
   void dispose() {
-    jumlahController.dispose();
+    amountController.dispose();
     budgetController.dispose();
-    catatanController.dispose();
+    addressController.dispose();
+    noteController.dispose();
     super.dispose();
   }
 
@@ -96,7 +102,7 @@ class _OrderButtonState extends State<OrderButton> {
                       ),
                       const SizedBox(height: 20),
                       TextField(
-                        controller: jumlahController,
+                        controller: amountController,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Jumlah Pesanan Kopi',
@@ -123,7 +129,18 @@ class _OrderButtonState extends State<OrderButton> {
                       ),
                       const SizedBox(height: 20),
                       TextField(
-                        controller: catatanController,
+                        controller: addressController,
+                        keyboardType: TextInputType.streetAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Alamat',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: noteController,
                         keyboardType: TextInputType.multiline,
                         maxLines: null,
                         minLines: 4,
@@ -134,6 +151,11 @@ class _OrderButtonState extends State<OrderButton> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      MyButton(
+                        onPressed: () => createOrder(),
+                        child: const Text('Buat Pesanan'),
+                      ),
                     ],
                   ),
                 ),
@@ -143,6 +165,25 @@ class _OrderButtonState extends State<OrderButton> {
         );
       },
     );
+  }
+
+  Future<void> createOrder() async {
+    final provider = context.read<OrderService>();
+    final userProv = context.read<AuthService>();
+    try {
+      await provider.createOrder(
+        token: userProv.token,
+        amount: int.parse(amountController.text),
+        maxPrice: budgetController.text,
+        address: addressController.text,
+        note: noteController.text,
+        longitudeBuyer: 0,
+        latitudeBuyer: 0,
+        userId: userProv.userId!,
+      );
+    } catch (e) {
+      printLog(e);
+    }
   }
 }
 
@@ -160,7 +201,7 @@ class MyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
-      height: 60,
+      height: 50,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,

@@ -1,6 +1,10 @@
+import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../../utils/loading.dart';
 import '../../home/widgets/button_order.dart';
+import '../provider/auth_service.dart';
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({
@@ -16,6 +20,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final phoneNumberController = TextEditingController();
 
   bool obsecurePass = true;
   String? _selectedItem;
@@ -41,6 +46,7 @@ class _RegisterFormState extends State<RegisterForm> {
         child: Column(
           children: [
             TextFormField(
+              controller: nameController,
               decoration: const InputDecoration(
                 labelText: 'Nama Lengkap',
                 border: OutlineInputBorder(
@@ -56,6 +62,7 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(
@@ -71,6 +78,7 @@ class _RegisterFormState extends State<RegisterForm> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: passwordController,
               obscureText: obsecurePass,
               decoration: InputDecoration(
                 labelText: 'Kata Sandi',
@@ -105,6 +113,7 @@ class _RegisterFormState extends State<RegisterForm> {
             const SizedBox(height: 20),
             TextFormField(
               keyboardType: TextInputType.phone,
+              controller: phoneNumberController,
               decoration: const InputDecoration(
                 labelText: 'Nomor Telepon',
                 border: OutlineInputBorder(
@@ -131,7 +140,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 value: _selectedItem,
                 hint: const Text('Pilih Jenis akun'),
                 isExpanded: true,
-                items: <String>['Pengguna', 'Merchan'].map((String value) {
+                items: <String>['user', 'merchant'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -147,7 +156,27 @@ class _RegisterFormState extends State<RegisterForm> {
             SizedBox(
               width: double.infinity,
               child: MyButton(
-                onPressed: () => register(),
+                onPressed: () {
+                  register().then((_) {
+                    LoadingDialog.hide(context);
+                    if (context.read<AuthService>().successRegis == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.green,
+                          content: Text('Registrasi Berhasil'),
+                        ),
+                      );
+                      Navigator.of(context).pushReplacementNamed('/login');
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Colors.red,
+                          content: Text('Registrasi Gagal'),
+                        ),
+                      );
+                    }
+                  });
+                },
                 child: Text(
                   'Daftar',
                   style: Theme.of(context)
@@ -183,12 +212,25 @@ class _RegisterFormState extends State<RegisterForm> {
   }
 
   Future<void> register() async {
-    if (formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Memproses Data'),
-        ),
-      );
+    final provider = context.read<AuthService>();
+    if (formKey.currentState!.validate() && _selectedItem != null) {
+      LoadingDialog.show(context, message: 'Membuat akun...');
+      printLog(nameController.text);
+      printLog(emailController.text);
+      printLog(passwordController.text);
+      printLog(phoneNumberController.text);
+      printLog(_selectedItem!);
+      try {
+        await provider.register(
+          name: nameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+          phoneNumber: phoneNumberController.text,
+          type: _selectedItem!,
+        );
+      } catch (e) {
+        printLog(e);
+      }
     }
   }
 }

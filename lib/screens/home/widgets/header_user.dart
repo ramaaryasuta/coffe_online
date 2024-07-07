@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../login/provider/auth_service.dart';
 
 class HeaderUserAccount extends StatelessWidget {
   const HeaderUserAccount({
@@ -7,6 +10,7 @@ class HeaderUserAccount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<AuthService>();
     return Container(
       margin: const EdgeInsets.only(top: 20),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -21,7 +25,7 @@ class HeaderUserAccount extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hallo, User!',
+              Text('Hallo, ${provider.userData?.name ?? 'User'}!',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 5),
               Text('Mau Ngopi Kapan nih?',

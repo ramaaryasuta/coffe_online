@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/background_decor.dart';
+// import 'widgets/background_decor.dart';
 import 'widgets/login_form.dart';
 import 'widgets/logo_app.dart';
 
@@ -9,31 +9,22 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SafeArea(
+    final double height = MediaQuery.of(context).size.height;
+    return SafeArea(
       child: Scaffold(
-        body: Stack(
-          children: [
-            BackgroundDecor(
-              top: -80,
-              right: -100,
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(top: height / 4, left: 20, right: 20),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                LogoApp(),
+                SizedBox(height: 20),
+                LoginForm(),
+              ],
             ),
-            BackgroundDecor(
-              bottom: -100,
-              left: -80,
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LogoApp(),
-                  SizedBox(height: 20),
-                  LoginForm(),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

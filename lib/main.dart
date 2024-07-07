@@ -1,27 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'screens/home/home_screen.dart';
+import 'screens/login/provider/auth_service.dart';
+import 'screens/login/register_screen.dart';
+import 'screens/login/login_screen.dart';
 import 'styles/text_theme.dart';
 import 'styles/colors.dart';
+import 'providers.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp();
+  await dotenv.load(fileName: '.env');
+  runApp(
+    MultiProvider(
+      providers: [...providers],
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Coffe Online',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: MyColor.primaryColor,
-        textTheme: GoogleFonts.poppinsTextTheme(myTextTheme),
-      ),
-      home: const HomeScreen(),
+    return Consumer<AuthService>(
+      builder: (context, value, child) {
+        return MaterialApp(
+          title: 'Coffe Online',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColor: MyColor.primaryColor,
+            textTheme: GoogleFonts.poppinsTextTheme(myTextTheme),
+          ),
+          initialRoute: value.token.isEmpty ? '/login' : '/',
+          routes: {
+            '/': (context) => const HomeScreen(),
+            '/login': (context) => const LoginScreen(),
+            '/register': (context) => const RegisterScreen(),
+          },
+        );
+      },
     );
   }
 }

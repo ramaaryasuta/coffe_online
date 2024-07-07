@@ -1,0 +1,127 @@
+import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../utils/print_log.dart';
+import '../../../utils/api_path.dart';
+import '../../../utils/api.dart';
+import '../models/user_model.dart';
+
+class AuthService with ChangeNotifier {
+  AuthService() {
+    _loadToken();
+  }
+
+  final APIservice apiService = APIservice();
+
+  String token = '';
+  int? userId;
+  UserDataModel? userData;
+
+  /// handling register cause 201 and 409 have same key 'message'
+  bool successRegis = false;
+  bool isLogin = false;
+
+  void _loadToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token') ?? '';
+    if (token.isNotEmpty) {
+      userId = decodeToken(token);
+      getUserData(userId!);
+    } else {
+      printLog('Gagal mendapatkan token');
+    }
+    notifyListeners();
+  }
+
+  int decodeToken(String token) {
+    try {
+      final decodeT = JWT.decode(token);
+      printLog(decodeT.payload['userId']);
+      return decodeT.payload['userId'] as int;
+    } catch (e) {
+      printLog(e);
+      return 0;
+    }
+  }
+
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      Response response = await apiService.postApi(
+        path: APIpath.login,
+        data: {'email': email, 'password': password},
+      );
+      if (response.statusCode == 200) {
+        isLogin = true;
+        token = response.data['token'];
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        userId = decodeToken(token);
+        getUserData(userId!);
+        notifyListeners();
+      } else if (response.statusCode != 200) {
+        printLog('Gagal Login, code: ${response.statusCode}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    token = '';
+    notifyListeners();
+  }
+
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    required String phoneNumber,
+    required String type,
+  }) async {
+    try {
+      Response response =
+          await apiService.postApi(path: APIpath.register, data: {
+        'name': name,
+        'email': email,
+        'password': password,
+        'phone_number': phoneNumber,
+        'type': type
+      });
+      if (response.statusCode == 201) {
+        successRegis = true;
+        notifyListeners();
+      } else {
+        printLog('Gagal Registrasi, code: ${response.statusCode}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> getUserData(int id) async {
+    try {
+      Response response = await apiService.getApi(
+        path: '${APIpath.getUserData}/$id',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        userData = UserDataModel.fromJson(response.data);
+        printLog(userData!);
+        notifyListeners();
+      } else {
+        printLog(
+          'Gagal mendapatkan data pengguna, code: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+}

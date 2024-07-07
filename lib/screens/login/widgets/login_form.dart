@@ -1,6 +1,10 @@
+import 'package:coffeonline/utils/loading.dart';
+import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../home/widgets/button_order.dart';
+import '../provider/auth_service.dart';
 import '../register_screen.dart';
 
 class LoginForm extends StatefulWidget {
@@ -14,6 +18,8 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final formKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
   bool obsecurePass = true;
 
@@ -39,6 +45,7 @@ class _LoginFormState extends State<LoginForm> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextFormField(
+              controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(
@@ -54,6 +61,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: passwordController,
               obscureText: obsecurePass,
               decoration: InputDecoration(
                 labelText: 'Kata Sandi',
@@ -89,7 +97,20 @@ class _LoginFormState extends State<LoginForm> {
             SizedBox(
               width: double.infinity,
               child: MyButton(
-                onPressed: () async => login(),
+                onPressed: () {
+                  login().then((value) {
+                    LoadingDialog.hide(context);
+                    if (context.read<AuthService>().token.isNotEmpty) {
+                      Navigator.of(context).pushReplacementNamed('/');
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Login Gagal'),
+                        ),
+                      );
+                    }
+                  });
+                },
                 child: Text(
                   'Masuk',
                   style: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -127,12 +148,17 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Future<void> login() async {
+    final provider = context.read<AuthService>();
     if (formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Processing Data'),
-        ),
-      );
+      LoadingDialog.show(context, message: 'Memuat Data...');
+      try {
+        await provider.login(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+      } catch (e) {
+        printLog(e);
+      }
     }
   }
 }

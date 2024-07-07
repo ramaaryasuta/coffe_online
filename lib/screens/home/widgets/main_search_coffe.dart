@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'button_order.dart';
-
 class SearchCoffe extends StatelessWidget {
   const SearchCoffe({
     super.key,
@@ -21,13 +19,6 @@ class SearchCoffe extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge!.copyWith(),
             ),
             const SizedBox(height: 10),
-            MyButton(
-              child: Text('Cari Kopi',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: Colors.white)),
-            ),
           ],
         ),
       ),
