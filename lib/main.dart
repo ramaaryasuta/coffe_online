@@ -1,3 +1,6 @@
+import 'package:coffeonline/firebase_option.dart';
+import 'package:coffeonline/utils/print_log.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,8 +15,15 @@ import 'styles/colors.dart';
 import 'providers.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    printLog('Firebase Initialized');
+  } catch (e) {
+    printLog('Failed to initialize Firebase: $e');
+  }
   await dotenv.load(fileName: '.env');
   runApp(
     MultiProvider(
@@ -41,7 +51,7 @@ class _MyAppState extends State<MyApp> {
     return Consumer<AuthService>(
       builder: (context, value, child) {
         return MaterialApp(
-          title: 'Coffe Online',
+          title: 'Go Coffe',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             primaryColor: MyColor.primaryColor,

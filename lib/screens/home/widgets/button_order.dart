@@ -154,7 +154,13 @@ class _OrderButtonState extends State<OrderButton> {
                       const SizedBox(height: 20),
                       MyButton(
                         onPressed: () => createOrder(),
-                        child: const Text('Buat Pesanan'),
+                        child: Text(
+                          'Buat Pesanan',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                  ),
+                        ),
                       ),
                     ],
                   ),
