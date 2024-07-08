@@ -215,18 +215,15 @@ class _RegisterFormState extends State<RegisterForm> {
     final provider = context.read<AuthService>();
     if (formKey.currentState!.validate() && _selectedItem != null) {
       LoadingDialog.show(context, message: 'Membuat akun...');
-      printLog(nameController.text);
-      printLog(emailController.text);
-      printLog(passwordController.text);
-      printLog(phoneNumberController.text);
-      printLog(_selectedItem!);
       try {
+        final fcmToken = await provider.createFCMToken();
         await provider.register(
           name: nameController.text,
           email: emailController.text,
           password: passwordController.text,
           phoneNumber: phoneNumberController.text,
           type: _selectedItem!,
+          fcmToken: fcmToken,
         );
       } catch (e) {
         printLog(e);

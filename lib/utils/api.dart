@@ -45,4 +45,23 @@ class APIservice {
       return response;
     }
   }
+
+  Future<Response> patchApi({
+    required String path,
+    required Map<String, dynamic> data,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      Response response = await dio.patch(
+        path,
+        data: data,
+        options: Options(headers: headers),
+      );
+      return response;
+    } on DioException catch (e) {
+      Response response = e.response!;
+      printLog(e);
+      return response;
+    }
+  }
 }

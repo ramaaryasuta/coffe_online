@@ -25,13 +25,13 @@ class OrderService with ChangeNotifier {
         path: APIpath.createOrder,
         headers: {'Authorization': 'Bearer $token'},
         data: {
-          'amount': amount,
-          'totalPrice': maxPrice,
-          'address': address,
-          'address_detail': note, // for detail change to note buyer
-          'longitude_buyer': longitudeBuyer,
-          'latitude_buyer': latitudeBuyer,
-          'userID': userId
+          "amount": amount,
+          "totalPrice": maxPrice,
+          "address": address,
+          "address_detail": note,
+          "latitude_buyer": latitudeBuyer,
+          "longitude_buyer": longitudeBuyer,
+          "userID": userId
         },
       );
       if (response.statusCode == 201) {
@@ -40,6 +40,124 @@ class OrderService with ChangeNotifier {
         notifyListeners();
       } else {
         printLog('Gagal membuat order, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> ongoingOrder({
+    required String token,
+    required String merchantId,
+  }) async {
+    try {
+      Response response = await apiService.postApi(
+        path: '${APIpath.ongoingOrder}/$merchantId',
+        headers: {'Authorization': 'Bearer $token'},
+        data: {"merchantID": merchantId},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  /// BELOM DIPAKE
+  Future<void> cancleOrder({
+    required String token,
+    required String orderId,
+  }) async {
+    try {
+      Response response = await apiService.postApi(
+        path: '${APIpath.ongoingOrder}/$orderId',
+        headers: {'Authorization': 'Bearer $token'},
+        data: {},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> completeOrder({
+    required String token,
+    required String orderId,
+  }) async {
+    try {
+      Response response = await apiService.postApi(
+        path: '${APIpath.completeOrder}/$orderId}',
+        headers: {'Authorization': 'Bearer $token'},
+        data: {},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> getOrderById({
+    required String token,
+    required String orderId,
+  }) async {
+    try {
+      Response response = await apiService.getApi(
+        path: '${APIpath.getOrderById}/$orderId}',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> getOrderByUser({
+    required String token,
+    required String userId,
+  }) async {
+    try {
+      Response response = await apiService.getApi(
+        path: '${APIpath.getOrderByUser}/$userId}',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
+  Future<void> getOrderByMerchant({
+    required String token,
+    required String merchantId,
+  }) async {
+    try {
+      Response response = await apiService.getApi(
+        path: '${APIpath.getOrderByMerchant}/$merchantId}',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        printLog(response.data);
+      } else {
+        printLog('Gagal, code: ${response.data}');
       }
     } catch (e) {
       printLog(e);

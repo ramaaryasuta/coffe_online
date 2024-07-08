@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "824025612236",
+    "project_id": "go-coffee-app",
+    "storage_bucket": "go-coffee-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:824025612236:android:7b269c79137632afac6769",
+        "android_client_info": {
+          "package_name": "com.example.coffeonline"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn2Swz31jutPiUHQmA9s1hMuSqMYHfXFs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

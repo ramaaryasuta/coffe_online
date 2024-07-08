@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
@@ -26,9 +27,9 @@ class AuthService with ChangeNotifier {
   void _loadToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
+    createFCMToken();
     if (token.isNotEmpty) {
       userId = decodeToken(token);
-      getUserData(userId!);
     } else {
       printLog('Gagal mendapatkan token');
     }
@@ -55,6 +56,7 @@ class AuthService with ChangeNotifier {
         path: APIpath.login,
         data: {'email': email, 'password': password},
       );
+      printLog(response.data);
       if (response.statusCode == 200) {
         isLogin = true;
         token = response.data['token'];
@@ -84,6 +86,7 @@ class AuthService with ChangeNotifier {
     required String password,
     required String phoneNumber,
     required String type,
+    required String fcmToken,
   }) async {
     try {
       Response response =
@@ -92,7 +95,8 @@ class AuthService with ChangeNotifier {
         'email': email,
         'password': password,
         'phone_number': phoneNumber,
-        'type': type
+        'type': type,
+        'token': fcmToken
       });
       if (response.statusCode == 201) {
         successRegis = true;
@@ -123,5 +127,12 @@ class AuthService with ChangeNotifier {
     } catch (e) {
       printLog(e);
     }
+  }
+
+  Future<String> createFCMToken() async {
+    FirebaseMessaging fcm = FirebaseMessaging.instance;
+    String? token = await fcm.getToken();
+    printLog(token);
+    return token ?? '';
   }
 }
