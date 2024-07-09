@@ -1,3 +1,5 @@
+import 'package:coffeonline/screens/home-merchant/merchant_screen.dart';
+import 'package:coffeonline/screens/profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../login/login_screen.dart';
@@ -32,8 +34,16 @@ class MenuContainer extends StatelessWidget {
         children: [
           MenuButton(
             icon: Icons.coffee_rounded,
-            title: 'Berdagang',
-            onTap: () {},
+            title: 'Merchant',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const MerchantScreen();
+                  },
+                ),
+              );
+            },
           ),
           MenuButton(
             icon: Icons.history_rounded,
@@ -45,7 +55,7 @@ class MenuContainer extends StatelessWidget {
             title: 'Profil',
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const LoginScreen();
+                return const ProfileScreen();
               }));
             },
           ),

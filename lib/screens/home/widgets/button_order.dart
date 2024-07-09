@@ -42,7 +42,7 @@ class _OrderButtonState extends State<OrderButton> {
             child: Row(
               children: [
                 Text(
-                  'Atur Pesanan',
+                  'Pesan Sekarang',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                       ),
@@ -152,14 +152,25 @@ class _OrderButtonState extends State<OrderButton> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      MyButton(
-                        onPressed: () => createOrder(),
-                        child: Text(
-                          'Buat Pesanan',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: MyButton(
+                          onPressed: () {
+                            createOrder().then(
+                              (value) {
+                                Navigator.pushNamed(context, '/waiting');
+                              },
+                            );
+                          },
+                          child: Text(
+                            'Buat Pesanan',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                ),
+                          ),
                         ),
                       ),
                     ],
@@ -176,6 +187,12 @@ class _OrderButtonState extends State<OrderButton> {
   Future<void> createOrder() async {
     final provider = context.read<OrderService>();
     final userProv = context.read<AuthService>();
+    provider.saveOrderData(
+      amountCoffe: int.parse(amountController.text),
+      maxPrice: budgetController.text,
+      address: addressController.text,
+      note: noteController.text,
+    );
     try {
       await provider.createOrder(
         token: userProv.token,
@@ -183,8 +200,8 @@ class _OrderButtonState extends State<OrderButton> {
         maxPrice: budgetController.text,
         address: addressController.text,
         note: noteController.text,
-        longitudeBuyer: 0,
-        latitudeBuyer: 0,
+        longitudeBuyer: -122.4180,
+        latitudeBuyer: 37.7740,
         userId: userProv.userId!,
       );
     } catch (e) {

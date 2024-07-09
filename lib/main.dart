@@ -6,6 +6,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'utils/socket/socket_service.dart';
+import 'screens/home-merchant/merchant_screen.dart';
+import 'screens/orders/waiting_accept.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/login/provider/auth_service.dart';
 import 'screens/login/register_screen.dart';
@@ -41,6 +44,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  SocketServices socketService = SocketServices();
   @override
   void initState() {
     super.initState();
@@ -59,9 +63,10 @@ class _MyAppState extends State<MyApp> {
           ),
           initialRoute: value.token.isEmpty ? '/login' : '/',
           routes: {
-            '/': (context) => const HomeScreen(),
+            '/': (context) => HomeScreen(),
             '/login': (context) => const LoginScreen(),
             '/register': (context) => const RegisterScreen(),
+            '/waiting': (context) => const WaitingAccept(),
           },
         );
       },

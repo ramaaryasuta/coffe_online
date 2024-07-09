@@ -1,11 +1,16 @@
+import 'package:coffeonline/screens/home-merchant/provider/merchant_service.dart';
+import 'package:coffeonline/utils/socket/socket_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/print_log.dart';
+import '../login/provider/auth_service.dart';
 import 'widgets/button_order.dart';
 import 'widgets/header_user.dart';
 import 'widgets/main_search_coffe.dart';
 import 'widgets/menu_container.dart';
+import 'widgets/merch_menu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,11 +20,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  SocketServices socketService = SocketServices();
   late FirebaseMessaging _firebaseMessaging;
 
   @override
   void initState() {
     super.initState();
+    socketService.connected();
+
     _firebaseMessaging = FirebaseMessaging.instance;
 
     // Request permissions for iOS
@@ -59,14 +67,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final provider = context.watch<MerchantService>();
+    final authProv = context.read<AuthService>();
+    printLog(authProv.typeUser);
+    return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            HeaderUserAccount(),
-            MenuContainer(),
-            SearchCoffe(),
-            OrderButton(),
+            const HeaderUserAccount(),
+            if (authProv.typeUser == 'merchant') ...[
+              MerchMenu(),
+            ],
+            if (authProv.typeUser == 'user') ...[
+              const MenuContainer(),
+              const SearchCoffe(),
+              Visibility(
+                visible: provider.listMerchant.isNotEmpty,
+                child: const OrderButton(),
+              )
+            ],
           ],
         ),
       ),

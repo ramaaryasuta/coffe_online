@@ -18,6 +18,7 @@ class AuthService with ChangeNotifier {
 
   String token = '';
   int? userId;
+  String? typeUser;
   UserDataModel? userData;
 
   /// handling register cause 201 and 409 have same key 'message'
@@ -29,21 +30,33 @@ class AuthService with ChangeNotifier {
     token = prefs.getString('token') ?? '';
     createFCMToken();
     if (token.isNotEmpty) {
-      userId = decodeToken(token);
+      decodeToken(token);
+      decodeType(token);
     } else {
       printLog('Gagal mendapatkan token');
     }
     notifyListeners();
   }
 
-  int decodeToken(String token) {
+  void decodeToken(String token) {
     try {
       final decodeT = JWT.decode(token);
       printLog(decodeT.payload['userId']);
-      return decodeT.payload['userId'] as int;
+      userId = decodeT.payload['userId'];
+      notifyListeners();
     } catch (e) {
       printLog(e);
-      return 0;
+    }
+  }
+
+  void decodeType(String token) {
+    try {
+      final decodeType = JWT.decode(token);
+      printLog(decodeType.payload['type']);
+      typeUser = decodeType.payload['type'];
+      notifyListeners();
+    } catch (e) {
+      printLog(e);
     }
   }
 
@@ -62,8 +75,7 @@ class AuthService with ChangeNotifier {
         token = response.data['token'];
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
-        userId = decodeToken(token);
-        getUserData(userId!);
+        decodeToken(token);
         notifyListeners();
       } else if (response.statusCode != 200) {
         printLog('Gagal Login, code: ${response.statusCode}');
@@ -77,6 +89,10 @@ class AuthService with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     token = '';
+    userData = null;
+    userId = null;
+    typeUser = null;
+    printLog('Berhasil Logout');
     notifyListeners();
   }
 
