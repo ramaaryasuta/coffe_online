@@ -1,3 +1,6 @@
+import 'package:coffeonline/screens/home/model/riwayat_model.dart';
+import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
+import 'package:coffeonline/screens/orders/models/order_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +12,29 @@ class OrderService with ChangeNotifier {
   final APIservice apiService = APIservice();
 
   bool successOrder = false;
+  OrderResponse? orderResponse;
+  OngoingResponse? ongoingResponse;
+
+  List<HistoryModel> historyOrder = [];
+
+  int? amountCoffe;
+  String? maxPrice;
+  String? address;
+  String? note;
+
+  void saveOrderData({
+    required int amountCoffe,
+    required String maxPrice,
+    required String address,
+    required String note,
+  }) {
+    this.amountCoffe = amountCoffe;
+    this.maxPrice = maxPrice;
+    this.address = address;
+    this.note = note;
+    printLog('Succes');
+    notifyListeners();
+  }
 
   Future<void> createOrder({
     required String token,
@@ -37,6 +63,7 @@ class OrderService with ChangeNotifier {
       if (response.statusCode == 201) {
         successOrder = true;
         printLog(response.data);
+        orderResponse = OrderResponse.fromJson(response.data);
         notifyListeners();
       } else {
         printLog('Gagal membuat order, code: ${response.data}');
@@ -147,7 +174,7 @@ class OrderService with ChangeNotifier {
 
   Future<void> getOrderByMerchant({
     required String token,
-    required String merchantId,
+    required int? merchantId,
   }) async {
     try {
       Response response = await apiService.getApi(
@@ -155,7 +182,10 @@ class OrderService with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        printLog(response.data);
+        var data = response.data as List;
+        historyOrder = data.map((e) => HistoryModel.fromJson(e)).toList();
+        printLog('panjang list order: ${historyOrder.length}');
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }

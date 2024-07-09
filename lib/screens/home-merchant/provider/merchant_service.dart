@@ -1,3 +1,4 @@
+import 'package:coffeonline/screens/home-merchant/models/merchant_model.dart';
 import 'package:coffeonline/utils/api.dart';
 import 'package:coffeonline/utils/api_path.dart';
 import 'package:coffeonline/utils/print_log.dart';
@@ -6,6 +7,9 @@ import 'package:flutter/material.dart';
 
 class MerchantService with ChangeNotifier {
   final APIservice apiService = APIservice();
+
+  List<Merchant> listMerchant = [];
+
   Future<void> searchNearbyMerchant({
     required String token,
     required String lat,
@@ -24,7 +28,9 @@ class MerchantService with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        printLog(response.data);
+        var list = response.data as List;
+        listMerchant = list.map((e) => Merchant.fromJson(e)).toList();
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }

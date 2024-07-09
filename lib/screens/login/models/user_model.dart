@@ -7,6 +7,7 @@ class UserDataModel {
   final String phoneNumber;
   final String? token;
   final String type;
+  final int? merchId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +20,7 @@ class UserDataModel {
     required this.phoneNumber,
     this.token,
     required this.type,
+    this.merchId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,6 +35,7 @@ class UserDataModel {
       phoneNumber: json['phone_number'],
       token: json['token'],
       type: json['type'],
+      merchId: json['merchantId'],
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -48,6 +51,7 @@ class UserDataModel {
       'phone_number': phoneNumber,
       'token': token,
       'type': type,
+      'merchantId': merchId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

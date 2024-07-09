@@ -25,6 +25,7 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<AuthService>();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
       decoration: BoxDecoration(
@@ -99,16 +100,18 @@ class _LoginFormState extends State<LoginForm> {
               child: MyButton(
                 onPressed: () {
                   login().then((value) {
-                    LoadingDialog.hide(context);
-                    if (context.read<AuthService>().token.isNotEmpty) {
-                      Navigator.of(context).pushReplacementNamed('/');
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Login Gagal'),
-                        ),
-                      );
-                    }
+                    getUserData().then((value) {
+                      LoadingDialog.hide(context);
+                      if (provider.userData!.type.isEmpty) {
+                        Navigator.of(context).pushReplacementNamed('/');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Login Gagal'),
+                          ),
+                        );
+                      }
+                    });
                   });
                 },
                 child: Text(
@@ -150,7 +153,6 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> login() async {
     final provider = context.read<AuthService>();
     if (formKey.currentState!.validate()) {
-      LoadingDialog.show(context, message: 'Memuat Data...');
       try {
         await provider.login(
           email: emailController.text,
@@ -159,6 +161,15 @@ class _LoginFormState extends State<LoginForm> {
       } catch (e) {
         printLog(e);
       }
+    }
+  }
+
+  Future<void> getUserData() async {
+    final provider = context.read<AuthService>();
+    if (provider.userData == null) {
+      await provider.getUserData(provider.userId!);
+    } else {
+      return Future.value();
     }
   }
 }
