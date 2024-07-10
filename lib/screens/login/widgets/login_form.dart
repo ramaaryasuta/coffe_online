@@ -2,7 +2,6 @@ import 'package:coffeonline/utils/loading.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../home/widgets/button_order.dart';
 import '../provider/auth_service.dart';
@@ -22,7 +21,6 @@ class _LoginFormState extends State<LoginForm> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  @override
   // void initState() {
   //   super.initState();
   //   WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -125,11 +123,20 @@ class _LoginFormState extends State<LoginForm> {
                   login().then((value) {
                     getUserData().then((value) {
                       LoadingDialog.hide(context);
-                      if (provider.userData!.type.isEmpty) {
+                      if (provider.userData!.type.isNotEmpty) {
                         Navigator.of(context).pushReplacementNamed('/');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.green,
+                            content: Text('Login Berhasil'),
+                          ),
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.red,
                             content: Text('Login Gagal'),
                           ),
                         );

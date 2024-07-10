@@ -1,13 +1,11 @@
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/home/widgets/merch_map.dart';
 import 'package:coffeonline/screens/login/provider/auth_service.dart';
-import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
-import 'package:coffeonline/screens/orders/models/order_model.dart';
+
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/socket/socket_service.dart';
 import '../provider/order_service.dart';
 
 class MerchOrder extends StatefulWidget {

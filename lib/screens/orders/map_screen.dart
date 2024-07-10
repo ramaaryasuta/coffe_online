@@ -33,8 +33,8 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     merchLoc = LatLng(
-      widget.ongoingData.merchant.latitude,
-      widget.ongoingData.merchant.longitude,
+      widget.ongoingData.merchant!.latitude,
+      widget.ongoingData.merchant!.longitude,
     );
 
     _markers.add(
@@ -49,7 +49,7 @@ class _MapScreenState extends State<MapScreen> {
       Marker(
         markerId: const MarkerId("Lokasi Penjual"),
         position: merchLoc!,
-        infoWindow: InfoWindow(title: widget.ongoingData.merchant.user.name),
+        infoWindow: InfoWindow(title: widget.ongoingData.merchant?.user.name),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ),
     );
@@ -123,7 +123,9 @@ class _MapScreenState extends State<MapScreen> {
             markers: _markers,
             polylines: _polyLines,
           ),
-          const CheckOrderButton()
+          CheckOrderButton(
+            dataOngoing: widget.ongoingData,
+          )
         ],
       ),
     );

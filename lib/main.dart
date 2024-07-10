@@ -6,8 +6,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'utils/socket/socket_service.dart';
-import 'screens/home-merchant/merchant_screen.dart';
 import 'screens/orders/waiting_accept.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/login/provider/auth_service.dart';

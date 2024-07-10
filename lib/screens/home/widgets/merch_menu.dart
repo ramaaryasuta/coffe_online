@@ -25,12 +25,12 @@ class _MerchMenuState extends State<MerchMenu> {
   late Future<void> fetchOrderHistoryFuture;
 
   void _fetchOrderHistory() async {
-    final _authService = context.read<AuthService>();
-    final _orderService = context.read<OrderService>();
-    printLog("function order merchant called ${_authService.token}");
-    await _orderService.getOrderByMerchant(
-      token: _authService.token,
-      merchantId: _authService.userData!.merchId,
+    final authService = context.read<AuthService>();
+    final orderService = context.read<OrderService>();
+    printLog("function order merchant called ${authService.token}");
+    await orderService.getOrderByMerchant(
+      token: authService.token,
+      merchantId: authService.userData!.merchId,
     );
   }
 

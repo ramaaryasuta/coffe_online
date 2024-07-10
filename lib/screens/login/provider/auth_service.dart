@@ -130,7 +130,7 @@ class AuthService with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        userData = UserDataModel.fromJson(response.data);
+        userData = await UserDataModel.fromJson(response.data);
         printLog(userData!);
         notifyListeners();
       } else {

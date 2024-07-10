@@ -45,6 +45,23 @@ class _HomeScreenState extends State<HomeScreen> {
       if (message.notification != null) {
         printLog(
             'Message also contained a notification: ${message.notification}');
+        showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text(message.notification!.title ?? 'No Title'),
+              content: Text(message.notification!.body ?? 'No Body'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       }
     });
 
@@ -61,6 +78,25 @@ class _HomeScreenState extends State<HomeScreen> {
         .then((RemoteMessage? message) {
       if (message != null) {
         printLog('App launched by notification: ${message.notification}');
+        if (message.notification != null) {
+          showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(message.notification!.title ?? 'No Title'),
+                content: Text(message.notification!.body ?? 'No Body'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       }
     });
   }

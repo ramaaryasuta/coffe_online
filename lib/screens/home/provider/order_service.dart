@@ -17,6 +17,9 @@ class OrderService with ChangeNotifier {
 
   List<HistoryModel> historyOrder = [];
 
+  double myLat = 0.0;
+  double myLong = 0.0;
+
   int? amountCoffe;
   String? maxPrice;
   String? address;
@@ -36,14 +39,18 @@ class OrderService with ChangeNotifier {
     notifyListeners();
   }
 
+  void saveMyLatLang(double lat, double long) {
+    myLat = lat;
+    myLong = long;
+    notifyListeners();
+  }
+
   Future<void> createOrder({
     required String token,
     required int amount,
     required String maxPrice,
     required String address,
     required String note,
-    required double longitudeBuyer,
-    required double latitudeBuyer,
     required int userId,
   }) async {
     try {
@@ -55,8 +62,8 @@ class OrderService with ChangeNotifier {
           "totalPrice": maxPrice,
           "address": address,
           "address_detail": note,
-          "latitude_buyer": latitudeBuyer,
-          "longitude_buyer": longitudeBuyer,
+          "latitude_buyer": myLat,
+          "longitude_buyer": myLong,
           "userID": userId
         },
       );
@@ -166,7 +173,11 @@ class OrderService with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        printLog(response.data);
+        historyOrder.clear();
+        var data = response.data as List;
+        historyOrder = data.map((e) => HistoryModel.fromJson(e)).toList();
+        printLog(historyOrder.length);
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }
