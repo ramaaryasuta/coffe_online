@@ -77,16 +77,21 @@ class OngoingResponse {
 class User {
   int id;
   String token;
-
+  String name;
+  String phoneNumber;
   User({
     required this.id,
     required this.token,
+    required this.name,
+    required this.phoneNumber,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
       token: json['token'],
+      name: json['name'],
+      phoneNumber: json['phone_number'],
     );
   }
 
@@ -94,6 +99,8 @@ class User {
     return {
       'id': id,
       'token': token,
+      'name': name,
+      'phone_number': phoneNumber,
     };
   }
 }

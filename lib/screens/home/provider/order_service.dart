@@ -76,10 +76,11 @@ class OrderService with ChangeNotifier {
   Future<void> ongoingOrder({
     required String token,
     required String merchantId,
+    required String orderId,
   }) async {
     try {
       Response response = await apiService.postApi(
-        path: '${APIpath.ongoingOrder}/$merchantId',
+        path: '${APIpath.ongoingOrder}/$orderId',
         headers: {'Authorization': 'Bearer $token'},
         data: {"merchantID": merchantId},
       );
@@ -144,7 +145,9 @@ class OrderService with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        printLog(response.data);
+        ongoingResponse = OngoingResponse.fromJson(response.data);
+        printLog(ongoingResponse);
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }
@@ -177,6 +180,7 @@ class OrderService with ChangeNotifier {
     required int? merchantId,
   }) async {
     try {
+      printLog("getOrderMerchant");
       Response response = await apiService.getApi(
         path: '${APIpath.getOrderByMerchant}/$merchantId}',
         headers: {'Authorization': 'Bearer $token'},
@@ -190,7 +194,7 @@ class OrderService with ChangeNotifier {
         printLog('Gagal, code: ${response.data}');
       }
     } catch (e) {
-      printLog(e);
+      printLog("error: $e");
     }
   }
 }

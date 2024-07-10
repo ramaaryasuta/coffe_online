@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MerchantService>();
-    final authProv = context.read<AuthService>();
+    final authProv = context.watch<AuthService>();
     printLog(authProv.typeUser);
     return Scaffold(
       body: SafeArea(

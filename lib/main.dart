@@ -44,7 +44,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  SocketServices socketService = SocketServices();
   @override
   void initState() {
     super.initState();
@@ -61,9 +60,9 @@ class _MyAppState extends State<MyApp> {
             primaryColor: MyColor.primaryColor,
             textTheme: GoogleFonts.poppinsTextTheme(myTextTheme),
           ),
-          initialRoute: value.token.isEmpty ? '/login' : '/',
+          initialRoute: '/login',
           routes: {
-            '/': (context) => HomeScreen(),
+            '/': (context) => const HomeScreen(),
             '/login': (context) => const LoginScreen(),
             '/register': (context) => const RegisterScreen(),
             '/waiting': (context) => const WaitingAccept(),

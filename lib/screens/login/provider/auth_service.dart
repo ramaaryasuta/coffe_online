@@ -41,7 +41,6 @@ class AuthService with ChangeNotifier {
   void decodeToken(String token) {
     try {
       final decodeT = JWT.decode(token);
-      printLog(decodeT.payload['userId']);
       userId = decodeT.payload['userId'];
       notifyListeners();
     } catch (e) {
@@ -52,7 +51,6 @@ class AuthService with ChangeNotifier {
   void decodeType(String token) {
     try {
       final decodeType = JWT.decode(token);
-      printLog(decodeType.payload['type']);
       typeUser = decodeType.payload['type'];
       notifyListeners();
     } catch (e) {
@@ -148,7 +146,6 @@ class AuthService with ChangeNotifier {
   Future<String> createFCMToken() async {
     FirebaseMessaging fcm = FirebaseMessaging.instance;
     String? token = await fcm.getToken();
-    printLog(token);
     return token ?? '';
   }
 }

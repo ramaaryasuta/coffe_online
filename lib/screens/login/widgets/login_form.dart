@@ -2,6 +2,7 @@ import 'package:coffeonline/utils/loading.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../home/widgets/button_order.dart';
 import '../provider/auth_service.dart';
@@ -20,6 +21,28 @@ class _LoginFormState extends State<LoginForm> {
   final formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     handleLogout();
+  //   });
+  // }
+
+  // void handleLogout() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? token = prefs.getString('token');
+  //   printLog("handleLogout token: ${token}");
+  //   final authService = Provider.of<AuthService>(context, listen: false);
+  //   if (token == null || token!.isEmpty) {
+  //     authService.logout();
+  //   } else {
+  //     await authService.getUserData(authService.userId!);
+  //     printLog("userData: ${authService.userData}");
+  //     await Navigator.of(context).pushReplacementNamed('/');
+  //   }
+  // }
 
   bool obsecurePass = true;
 
