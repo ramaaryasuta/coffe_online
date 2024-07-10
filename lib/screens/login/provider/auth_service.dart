@@ -146,6 +146,7 @@ class AuthService with ChangeNotifier {
   Future<String> createFCMToken() async {
     FirebaseMessaging fcm = FirebaseMessaging.instance;
     String? token = await fcm.getToken();
+    printLog("FCM Token: $token");
     return token ?? '';
   }
 }

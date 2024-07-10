@@ -22,6 +22,7 @@ class _MerchMenuState extends State<MerchMenu> {
   OrderResponse? order;
   OrderResponse? orderPrev;
   bool isFetched = false;
+  int totalrequests = 0;
   late Future<void> fetchOrderHistoryFuture;
 
   void _fetchOrderHistory() async {
@@ -53,9 +54,23 @@ class _MerchMenuState extends State<MerchMenu> {
       printLog('Socket mencari penjual...');
       printLog(data);
       order = OrderResponse.fromJson(data);
-      if (order != orderPrev) {
-        orderPrev = order;
-        _showOrderDialog(context, order!, userProv);
+      printLog("order: ${order?.toJson()} prev: ${orderPrev?.toJson()}");
+      if (totalrequests < 1) {
+        if (orderPrev != null && order!.id != orderPrev!.id) {
+          orderPrev = order;
+          setState(() {
+            totalrequests = totalrequests + 1;
+          });
+          _showOrderDialog(context, order!, userProv, totalrequests);
+        } else {
+          if (orderPrev == null && order != null) {
+            orderPrev = order;
+            setState(() {
+              totalrequests = totalrequests + 1;
+            });
+            _showOrderDialog(context, order!, userProv, totalrequests);
+          }
+        }
       }
     });
 
@@ -82,6 +97,7 @@ class _MerchMenuState extends State<MerchMenu> {
                   itemCount: _orderService.historyOrder.length,
                   itemBuilder: (context, index) {
                     final order = _orderService.historyOrder[index];
+                    printLog('history order: ${order.toJson()}');
                     if (order.status == 'ongoing') {
                       return ListTile(
                         title: Text(order.id.toString()),
@@ -96,6 +112,8 @@ class _MerchMenuState extends State<MerchMenu> {
                           ));
                         },
                       );
+                    } else {
+                      return Container();
                     }
                     // else {
                     //   if (index == 0) {
@@ -128,6 +146,7 @@ class _MerchMenuState extends State<MerchMenu> {
                   itemCount: _orderService.historyOrder.length,
                   itemBuilder: (context, index) {
                     final order = _orderService.historyOrder[index];
+                    printLog('history order bottom: ${order.toJson()}');
                     if (order.status == 'completed') {
                       return ListTile(
                         title: Text(order.id.toString()),
@@ -150,6 +169,7 @@ class _MerchMenuState extends State<MerchMenu> {
     BuildContext context,
     OrderResponse order,
     AuthService userProv,
+    int totalRequests,
   ) {
     final _orderService = context.read<OrderService>();
 
@@ -187,7 +207,8 @@ class _MerchMenuState extends State<MerchMenu> {
               child: Column(
                 children: [
                   AppBar(
-                    title: Text('Request Order'),
+                    title: Text(
+                        'Request Order #${totalRequests != 0 ? totalRequests : ''}'),
                     automaticallyImplyLeading: false,
                     actions: [
                       IconButton(
@@ -264,7 +285,17 @@ class _MerchMenuState extends State<MerchMenu> {
                         merchantId: userProv.userData!.merchId.toString(),
                         orderId: order.id.toString(),
                       );
-                      Navigator.of(context).pop();
+                      setState(() {
+                        totalrequests = 0;
+                      });
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) {
+                          return MerchOrder(
+                            orderId: order.id.toString(),
+                          );
+                        },
+                      ));
                     },
                   ),
                 ],
