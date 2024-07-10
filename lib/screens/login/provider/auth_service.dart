@@ -11,7 +11,7 @@ import '../models/user_model.dart';
 
 class AuthService with ChangeNotifier {
   AuthService() {
-    _loadToken();
+    loadToken();
   }
 
   final APIservice apiService = APIservice();
@@ -25,7 +25,8 @@ class AuthService with ChangeNotifier {
   bool successRegis = false;
   bool isLogin = false;
 
-  void _loadToken() async {
+  void loadToken() async {
+    printLog('Load Token');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
     createFCMToken();
@@ -131,7 +132,7 @@ class AuthService with ChangeNotifier {
       );
       if (response.statusCode == 200) {
         userData = await UserDataModel.fromJson(response.data);
-        printLog(userData!);
+        printLog('userdata: $userData');
         notifyListeners();
       } else {
         printLog(

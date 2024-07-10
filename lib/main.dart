@@ -1,4 +1,5 @@
 import 'package:coffeonline/firebase_option.dart';
+import 'package:coffeonline/intropage.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -58,8 +59,9 @@ class _MyAppState extends State<MyApp> {
             primaryColor: MyColor.primaryColor,
             textTheme: GoogleFonts.poppinsTextTheme(myTextTheme),
           ),
-          initialRoute: '/login',
+          initialRoute: '/check',
           routes: {
+            '/check': (context) => const IntroPage(),
             '/': (context) => const HomeScreen(),
             '/login': (context) => const LoginScreen(),
             '/register': (context) => const RegisterScreen(),

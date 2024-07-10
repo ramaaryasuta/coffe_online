@@ -8,7 +8,19 @@ import 'package:flutter/material.dart';
 class MerchantService with ChangeNotifier {
   final APIservice apiService = APIservice();
 
+  int count = 0;
+
   List<Merchant> listMerchant = [];
+
+  void incrementCount() {
+    count++;
+    notifyListeners();
+  }
+
+  void decrementCount() {
+    count = 0;
+    notifyListeners();
+  }
 
   Future<void> searchNearbyMerchant({
     required String token,
@@ -83,19 +95,17 @@ class MerchantService with ChangeNotifier {
     required String longitude,
     required String stock,
     required String price,
-    required String status,
     // param kirim file untuk avatar
   }) async {
     try {
       Response response = await apiService.postApi(
-        path: '${APIpath.updateMerchantInfo}$id',
+        path: '${APIpath.updateMerchantInfo}/$id',
         headers: {'Authorization': 'Bearer $token'},
         data: {
           "latitude": latitude,
           "longitude": longitude,
           "stock": stock,
           "price": price,
-          "status": status,
         },
       );
 

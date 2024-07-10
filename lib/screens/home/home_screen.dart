@@ -111,10 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             const HeaderUserAccount(),
-            if (authProv.typeUser == 'merchant') ...[
+            if (authProv.userData!.type == 'merchant') ...[
               MerchMenu(),
             ],
-            if (authProv.typeUser == 'user') ...[
+            if (authProv.userData!.type == 'user') ...[
               const MenuContainer(),
               const SearchCoffe(),
               Visibility(

@@ -3,11 +3,13 @@ import 'package:coffeonline/screens/home/widgets/merch_map.dart';
 import 'package:coffeonline/screens/home/widgets/merch_order.dart';
 import 'package:coffeonline/screens/login/provider/auth_service.dart';
 import 'package:coffeonline/screens/orders/models/order_model.dart';
+import 'package:coffeonline/utils/date_convert.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/socket/socket_service.dart';
+import '../../home-merchant/provider/merchant_service.dart';
 import '../provider/order_service.dart';
 
 class MerchMenu extends StatefulWidget {
@@ -44,6 +46,7 @@ class _MerchMenuState extends State<MerchMenu> {
   @override
   Widget build(BuildContext context) {
     print('MerchMenu build called');
+    final merchProv = context.watch<MerchantService>();
     final userProv = Provider.of<AuthService>(context, listen: true);
     final _orderService = context.watch<OrderService>();
     final socketService = Provider.of<SocketServices>(context, listen: true);
@@ -53,9 +56,12 @@ class _MerchMenuState extends State<MerchMenu> {
       printLog('Socket mencari penjual...');
       printLog(data);
       order = OrderResponse.fromJson(data);
-      if (order != orderPrev) {
-        orderPrev = order;
-        _showOrderDialog(context, order!, userProv);
+      if (merchProv.count < 1) {
+        if (order != orderPrev) {
+          orderPrev = order;
+          _showOrderDialog(context, order!, userProv);
+          merchProv.incrementCount();
+        }
       }
     });
 
@@ -67,46 +73,55 @@ class _MerchMenuState extends State<MerchMenu> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MyButton(
-                  child: const Text('Refresh Order',
-                      style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    _fetchOrderHistory();
-                  }),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  MyButton(
+                      child: const Text('Refresh Order',
+                          style: TextStyle(color: Colors.white)),
+                      onPressed: () {
+                        _fetchOrderHistory();
+                      }),
+                  MyButton(
+                      child: const Text('Logout',
+                          style: TextStyle(color: Colors.white)),
+                      onPressed: () {
+                        context.read<AuthService>().logout();
+                        Navigator.pushReplacementNamed(context, '/login');
+                      }),
+                ],
+              ),
               Text('Ongoing Order',
                   style: Theme.of(context).textTheme.titleLarge),
               Container(
                 width: double.infinity,
-                height: 200,
+                height: 150,
                 child: ListView.builder(
                   itemCount: _orderService.historyOrder.length,
                   itemBuilder: (context, index) {
                     final order = _orderService.historyOrder[index];
                     if (order.status == 'ongoing') {
-                      return ListTile(
-                        title: Text(order.id.toString()),
-                        subtitle: Text(order.status),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) {
-                              return MerchOrder(
-                                orderId: order.id.toString(),
-                              );
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text('Order ID ${order.id}'),
+                            subtitle: Text('Status: ${order.status}'),
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) {
+                                  return MerchOrder(
+                                    orderId: order.id.toString(),
+                                  );
+                                },
+                              ));
                             },
-                          ));
-                        },
+                          ),
+                          const Divider(),
+                        ],
                       );
+                    } else {
+                      return Container();
                     }
-                    // else {
-                    //   if (index == 0) {
-                    //     return Container(
-                    //       height: 200,
-                    //       child: Center(child: Text('No ongoing order')),
-                    //     );
-                    //   } else {
-                    //     return Container();
-                    //   }
-                    // }
                   },
                 ),
               ),
@@ -123,15 +138,22 @@ class _MerchMenuState extends State<MerchMenu> {
               ),
               Container(
                 width: double.infinity,
-                height: 300,
+                height: MediaQuery.of(context).size.height * 0.5,
                 child: ListView.builder(
                   itemCount: _orderService.historyOrder.length,
                   itemBuilder: (context, index) {
                     final order = _orderService.historyOrder[index];
                     if (order.status == 'completed') {
-                      return ListTile(
-                        title: Text(order.id.toString()),
-                        subtitle: Text(order.status),
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Text('Order By ${order.address}'),
+                            subtitle: Text('Status : ${order.status}'),
+                            trailing: Text(
+                                formatDateTime(order.createdAt.toString())),
+                          ),
+                          const Divider(),
+                        ],
                       );
                     } else {
                       return Container();
@@ -152,7 +174,7 @@ class _MerchMenuState extends State<MerchMenu> {
     AuthService userProv,
   ) {
     final _orderService = context.read<OrderService>();
-
+    final merchProv = context.read<MerchantService>();
     String formatPrice(double price) {
       String priceString = price.toStringAsFixed(
           2); // Convert price to a string with 2 decimal places
@@ -193,80 +215,75 @@ class _MerchMenuState extends State<MerchMenu> {
                       IconButton(
                         icon: Icon(Icons.close),
                         onPressed: () {
+                          merchProv.decrementCount();
                           Navigator.of(context).pop();
                         },
                       ),
                     ],
                   ),
                   Expanded(
-                    child: ListView.builder(
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        return Container(
-                          child: Column(
+                    child: Container(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                              Column(
                                 children: [
-                                  Column(
-                                    children: [
-                                      Text("Jumlah Kopi"),
-                                      Text(order.amount.toString()),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text("Estimasi Biaya"),
-                                      Text(formatPrice(
-                                          double.parse(order.totalPrice))),
-                                    ],
-                                  ),
+                                  Text("Jumlah Kopi"),
+                                  Text(order.amount.toString()),
                                 ],
                               ),
-                              ListTile(
-                                title: Text(order.user.name),
-                                subtitle: Text(
-                                    "Alamat: ${order.address} \nCatatan: ${order.addressDetail}"),
+                              Column(
+                                children: [
+                                  Text("Estimasi Biaya"),
+                                  Text(formatPrice(
+                                      double.parse(order.totalPrice))),
+                                ],
                               ),
                             ],
                           ),
-                        );
-                      },
+                          ListTile(
+                            title: Text(order.user.name),
+                            subtitle: Text(
+                                "Alamat: ${order.address} \nCatatan: ${order.addressDetail}"),
+                          ),
+                          Container(
+                              padding: EdgeInsets.all(18),
+                              margin: EdgeInsets.only(bottom: 20),
+                              height: 400,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: MerchMap(
+                                  latitudeBuyer: order.latitudeBuyer,
+                                  longitudeBuyer: order.longitudeBuyer,
+                                  latitudeMerchant: 37.67819,
+                                  longitudeMerchant: -122.017291)),
+                          MyButton(
+                            child: Text(
+                              'Terima Order',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .copyWith(color: Colors.white),
+                            ),
+                            onPressed: () {
+                              _orderService.ongoingOrder(
+                                token: userProv.token,
+                                merchantId:
+                                    userProv.userData!.merchId.toString(),
+                                orderId: order.id.toString(),
+                              );
+                              merchProv.decrementCount();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text("Lokasi Pembeli",
-                      style: Theme.of(context).textTheme.titleLarge),
-                  Container(
-                      padding: EdgeInsets.all(18),
-                      margin: EdgeInsets.only(bottom: 20),
-                      height: 400,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12)),
-                      child: MerchMap(
-                          latitudeBuyer: order.latitudeBuyer,
-                          longitudeBuyer: order.longitudeBuyer,
-                          latitudeMerchant: 37.67819,
-                          longitudeMerchant: -122.017291)),
-                  MyButton(
-                    child: Text(
-                      'Terima Order',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(color: Colors.white),
-                    ),
-                    onPressed: () {
-                      _orderService.ongoingOrder(
-                        token: userProv.token,
-                        merchantId: userProv.userData!.merchId.toString(),
-                        orderId: order.id.toString(),
-                      );
-                      Navigator.of(context).pop();
-                    },
-                  ),
+                  )
                 ],
               ),
             ),
