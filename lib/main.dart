@@ -1,4 +1,5 @@
 import 'package:coffeonline/firebase_option.dart';
+import 'package:coffeonline/intropage.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import 'utils/socket/socket_service.dart';
-import 'screens/home-merchant/merchant_screen.dart';
 import 'screens/orders/waiting_accept.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/login/provider/auth_service.dart';
@@ -44,7 +43,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  SocketServices socketService = SocketServices();
   @override
   void initState() {
     super.initState();
@@ -61,9 +59,10 @@ class _MyAppState extends State<MyApp> {
             primaryColor: MyColor.primaryColor,
             textTheme: GoogleFonts.poppinsTextTheme(myTextTheme),
           ),
-          initialRoute: value.token.isEmpty ? '/login' : '/',
+          initialRoute: '/check',
           routes: {
-            '/': (context) => HomeScreen(),
+            '/check': (context) => const IntroPage(),
+            '/': (context) => const HomeScreen(),
             '/login': (context) => const LoginScreen(),
             '/register': (context) => const RegisterScreen(),
             '/waiting': (context) => const WaitingAccept(),

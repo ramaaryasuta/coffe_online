@@ -4,6 +4,7 @@ import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../utils/socket/socket_service.dart';
 import '../home/provider/order_service.dart';
@@ -22,19 +23,39 @@ class _WaitingAcceptState extends State<WaitingAccept> {
   OngoingResponse? order;
 
   @override
-  Widget build(BuildContext context) {
-    final userProv = Provider.of<AuthService>(context, listen: true);
-    final orderProv = Provider.of<OrderService>(context, listen: true);
-    final socketService = Provider.of<SocketServices>(context, listen: true);
+  void initState() {
+    super.initState();
+    final socketService = Provider.of<SocketServices>(context, listen: false);
+    final userProv = Provider.of<AuthService>(context, listen: false);
+
     socketService.socket.connect();
-    socketService.socket.on('${userProv.userId}-ongoing-order', (data) {
-      printLog('Socket mencari penjual...');
-      printLog(data);
-      order = OngoingResponse.fromJson(data);
+    socketService.socket.on('${userProv.userId}-ongoing-order', _handleOrder);
+  }
+
+  void _handleOrder(dynamic data) async {
+    printLog('Socket mencari penjual acc');
+    printLog(data);
+    order = await OngoingResponse.fromJson(data);
+    if (mounted) {
       setState(() {
+        printLog('ini order $order');
         isAcceptedOrder = true;
       });
-    });
+    }
+  }
+
+  @override
+  void dispose() {
+    final socketService = Provider.of<SocketServices>(context, listen: false);
+    final userProv = Provider.of<AuthService>(context, listen: false);
+
+    socketService.socket.off('${userProv.userId}-ongoing-order', _handleOrder);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final orderProv = Provider.of<OrderService>(context, listen: true);
 
     return Scaffold(
       body: Center(
@@ -42,6 +63,11 @@ class _WaitingAcceptState extends State<WaitingAccept> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (!isAcceptedOrder) ...[
+              SvgPicture.asset(
+                'assets/waiting.svg',
+                height: 200,
+                width: 200,
+              ),
               Text(
                 'Mencari Penjual yang siap melayani',
                 style: Theme.of(context).textTheme.titleLarge,
@@ -77,9 +103,18 @@ class _WaitingAcceptState extends State<WaitingAccept> {
               ),
             ],
             if (isAcceptedOrder) ...[
-              Text(
-                'Penjual Berhasil Menerima Pesanan',
-                style: Theme.of(context).textTheme.headlineMedium,
+              SvgPicture.asset(
+                'assets/accept.svg',
+                height: 200,
+                width: 200,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'Penjual Berhasil Menerima Pesanan Anda',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
               MyButton(
                 child: Text('Cek Lokasi',

@@ -21,6 +21,27 @@ class _LoginFormState extends State<LoginForm> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     handleLogout();
+  //   });
+  // }
+
+  // void handleLogout() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? token = prefs.getString('token');
+  //   printLog("handleLogout token: ${token}");
+  //   final authService = Provider.of<AuthService>(context, listen: false);
+  //   if (token == null || token!.isEmpty) {
+  //     authService.logout();
+  //   } else {
+  //     await authService.getUserData(authService.userId!);
+  //     printLog("userData: ${authService.userData}");
+  //     await Navigator.of(context).pushReplacementNamed('/');
+  //   }
+  // }
+
   bool obsecurePass = true;
 
   @override
@@ -102,11 +123,20 @@ class _LoginFormState extends State<LoginForm> {
                   login().then((value) {
                     getUserData().then((value) {
                       LoadingDialog.hide(context);
-                      if (provider.userData!.type.isEmpty) {
+                      if (provider.userData!.type.isNotEmpty) {
                         Navigator.of(context).pushReplacementNamed('/');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.green,
+                            content: Text('Login Berhasil'),
+                          ),
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
+                            duration: Duration(seconds: 2),
+                            backgroundColor: Colors.red,
                             content: Text('Login Gagal'),
                           ),
                         );

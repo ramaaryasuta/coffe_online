@@ -3,21 +3,22 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'widgets/check_order.dart';
-
-class MapScreen extends StatefulWidget {
-  MapScreen({
+class MerchMap extends StatefulWidget {
+  MerchMap({
     super.key,
-    required this.ongoingData,
+    required this.latitudeBuyer,
+    required this.longitudeBuyer,
+    required this.latitudeMerchant,
+    required this.longitudeMerchant,
   });
 
-  OngoingResponse ongoingData;
+  double latitudeBuyer, longitudeBuyer, latitudeMerchant, longitudeMerchant;
 
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _MapScreenState extends State<MerchMap> {
   late GoogleMapController mapController;
 
   LatLng? buyerLoc; // lokasi mu
@@ -28,29 +29,29 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     buyerLoc = LatLng(
-      widget.ongoingData.latitudeBuyer,
-      widget.ongoingData.longitudeBuyer,
+      widget.latitudeBuyer,
+      widget.longitudeBuyer,
     );
 
     merchLoc = LatLng(
-      widget.ongoingData.merchant!.latitude,
-      widget.ongoingData.merchant!.longitude,
+      widget.latitudeMerchant,
+      widget.longitudeMerchant,
     );
 
     _markers.add(
       Marker(
-        markerId: const MarkerId("Lokasi Saya"),
+        markerId: const MarkerId("Lokasi Pembeli"),
         position: buyerLoc!,
-        infoWindow: const InfoWindow(title: "Lokasi Saya"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: const InfoWindow(title: "Lokasi Pembeli"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       ),
     );
     _markers.add(
       Marker(
-        markerId: const MarkerId("Lokasi Penjual"),
+        markerId: const MarkerId("Lokasi Saya"),
         position: merchLoc!,
-        infoWindow: InfoWindow(title: widget.ongoingData.merchant?.user.name),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        infoWindow: InfoWindow(title: "Lokasi Saya"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
       ),
     );
     _getRoute();
@@ -105,29 +106,32 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Pesananmu',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: Text(
+    //       'Mode Merchant',
+    //       style: Theme.of(context).textTheme.titleLarge,
+    //     ),
+    //   ),
+    //   body: GoogleMap(
+    //     onMapCreated: _onMapCreated,
+    //     initialCameraPosition: CameraPosition(
+    //       target: buyerLoc!,
+    //       zoom: 13.0,
+    //     ),
+    //     markers: _markers,
+    //     polylines: _polyLines,
+    //   ),
+    //   body:
+    // );
+    return GoogleMap(
+      onMapCreated: _onMapCreated,
+      initialCameraPosition: CameraPosition(
+        target: buyerLoc!,
+        zoom: 13.0,
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: buyerLoc!,
-              zoom: 13.0,
-            ),
-            markers: _markers,
-            polylines: _polyLines,
-          ),
-          CheckOrderButton(
-            dataOngoing: widget.ongoingData,
-          )
-        ],
-      ),
+      markers: _markers,
+      polylines: _polyLines,
     );
   }
 }
