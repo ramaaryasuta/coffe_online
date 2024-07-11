@@ -29,13 +29,13 @@ class MenuContainer extends StatelessWidget {
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
-        alignment: WrapAlignment.spaceBetween,
+        alignment: WrapAlignment.spaceEvenly,
         children: [
-          MenuButton(
-            icon: Icons.coffee_rounded,
-            title: 'Merchant',
-            onTap: () {},
-          ),
+          // MenuButton(
+          //   icon: Icons.coffee_rounded,
+          //   title: 'Merchant',
+          //   onTap: () {},
+          // ),
           MenuButton(
             icon: Icons.history_rounded,
             title: 'Riwayat',

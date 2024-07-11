@@ -3,6 +3,7 @@ import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:coffeonline/screens/orders/models/order_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/api.dart';
 import '../../../utils/api_path.dart';
@@ -10,10 +11,15 @@ import '../../../utils/print_log.dart';
 
 class OrderService with ChangeNotifier {
   final APIservice apiService = APIservice();
+  final APIservice? apiServiceOrder;
+
+  OrderService({this.apiServiceOrder});
 
   bool successOrder = false;
   OrderResponse? orderResponse;
+  OrderResponse? orderRequestResponse;
   OngoingResponse? ongoingResponse;
+  late int orderRequestId;
 
   List<HistoryModel> historyOrder = [];
 
@@ -24,6 +30,47 @@ class OrderService with ChangeNotifier {
   String? maxPrice;
   String? address;
   String? note;
+
+  Future<void> saveRequest({required String id}) async {
+    orderRequestId = int.parse(id);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('orderRequestId', orderRequestId);
+    int idOrder = await prefs.getInt('orderRequestId')!;
+    printLog('save id: $idOrder');
+    notifyListeners();
+  }
+
+  Future<void> resetOrderRequest() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('orderRequestId');
+    orderRequestResponse = null;
+    notifyListeners();
+  }
+
+  Future<void> getOrderRequested({required String token}) async {
+    try {
+      printLog("getorderrequest");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int idOrder = await prefs.getInt('orderRequestId')!;
+      printLog("getOrderRequested ID: $idOrder");
+      Response response = await apiService.getApi(
+          path: '${APIpath.getOrderById}/$idOrder',
+          headers: {'Authorization': 'Bearer $token'});
+
+      if (response.statusCode == 200) {
+        orderRequestResponse = OrderResponse.fromJson(response.data);
+        if (orderRequestResponse!.merchantId != null) {
+          orderRequestResponse = null;
+          await prefs.remove('orderRequestId');
+        }
+        printLog(orderRequestResponse);
+        notifyListeners();
+      }
+      notifyListeners();
+    } catch (e) {
+      printLog(e);
+    }
+  }
 
   void saveOrderData({
     required int amountCoffe,
@@ -148,10 +195,11 @@ class OrderService with ChangeNotifier {
   }) async {
     try {
       Response response = await apiService.getApi(
-        path: '${APIpath.getOrderById}/$orderId}',
+        path: '${APIpath.getOrderById}/$orderId',
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
+        printLog(response.data);
         ongoingResponse = OngoingResponse.fromJson(response.data);
         printLog(ongoingResponse);
         notifyListeners();

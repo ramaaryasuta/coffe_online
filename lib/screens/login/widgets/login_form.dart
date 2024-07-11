@@ -124,7 +124,7 @@ class _LoginFormState extends State<LoginForm> {
                     getUserData().then((value) {
                       LoadingDialog.hide(context);
                       if (provider.userData!.type.isNotEmpty) {
-                        Navigator.of(context).pushReplacementNamed('/');
+                        Navigator.of(context).pushNamed('/');
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             duration: Duration(seconds: 2),
@@ -133,6 +133,7 @@ class _LoginFormState extends State<LoginForm> {
                           ),
                         );
                       } else {
+                        printLog('Login gagal');
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             duration: Duration(seconds: 2),
@@ -141,7 +142,25 @@ class _LoginFormState extends State<LoginForm> {
                           ),
                         );
                       }
+                    }).catchError((e) {
+                      printLog(e);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Colors.red,
+                          content: Text('Login Gagal'),
+                        ),
+                      );
                     });
+                  }).catchError((e) {
+                    printLog(e);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        duration: Duration(seconds: 2),
+                        backgroundColor: Colors.red,
+                        content: Text('Login Gagal'),
+                      ),
+                    );
                   });
                 },
                 child: Text(

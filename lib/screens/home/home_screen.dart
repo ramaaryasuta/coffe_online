@@ -39,12 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Configure message handlers
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      printLog('Received a message while in the foreground!');
-      printLog('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        printLog(
-            'Message also contained a notification: ${message.notification}');
+      if (message.notification != null &&
+          message.notification!.title != 'New Order') {
         showDialog(
           context: context,
           builder: (_) {
@@ -105,24 +101,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<MerchantService>();
     final authProv = context.watch<AuthService>();
-    printLog(authProv.typeUser);
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const HeaderUserAccount(),
-            if (authProv.userData!.type == 'merchant') ...[
-              MerchMenu(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            children: [
+              const HeaderUserAccount(),
+              if (authProv.userData != null &&
+                  authProv.userData!.type == 'merchant') ...[MerchMenu()],
+              if (authProv.userData != null &&
+                  authProv.userData!.type == 'user') ...[
+                const MenuContainer(),
+                const SearchCoffe(),
+                Visibility(
+                  visible: provider.listMerchant.isNotEmpty,
+                  child: const OrderButton(),
+                )
+              ],
             ],
-            if (authProv.userData!.type == 'user') ...[
-              const MenuContainer(),
-              const SearchCoffe(),
-              Visibility(
-                visible: provider.listMerchant.isNotEmpty,
-                child: const OrderButton(),
-              )
-            ],
-          ],
+          ),
         ),
       ),
     );

@@ -42,7 +42,7 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
           const CircleAvatar(
             radius: 30,
             backgroundImage: NetworkImage(
-                'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg'),
+                'https://cdn.frankerfacez.com/avatar/twitch/111568438'),
           ),
           const SizedBox(width: 20),
           Column(
@@ -51,8 +51,14 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
               Text('Hallo, ${provider.userData?.name ?? 'User'}!',
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 5),
-              Text('Mau Ngopi Kapan nih?',
-                  style: Theme.of(context).textTheme.bodySmall),
+              if (provider.userData?.type == 'user') ...[
+                Text('Mau Ngopi Kapan nih?',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ],
+              if (provider.userData?.type == 'merchant') ...[
+                Text('Tetap hati-hati',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ]
             ],
           ),
           const Spacer(),
@@ -95,8 +101,8 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
               height: 10,
             ),
             MyButton(
-              child:
-                  const Text('Perbarui', style: TextStyle(color: Colors.white)),
+              child: const Text('Perbarui Data & Lokasi',
+                  style: TextStyle(color: Colors.white)),
               onPressed: () {
                 updateMerchInfo().then((value) => Navigator.pop(context));
               },

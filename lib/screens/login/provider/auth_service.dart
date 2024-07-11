@@ -25,6 +25,10 @@ class AuthService with ChangeNotifier {
   bool successRegis = false;
   bool isLogin = false;
 
+  Future<String> getToken() async {
+    return await token;
+  }
+
   void loadToken() async {
     printLog('Load Token');
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -41,8 +45,10 @@ class AuthService with ChangeNotifier {
 
   void decodeToken(String token) {
     try {
-      final decodeT = JWT.decode(token);
-      userId = decodeT.payload['userId'];
+      if (token.isNotEmpty) {
+        final decodeT = JWT.decode(token);
+        userId = decodeT.payload['userId'];
+      }
       notifyListeners();
     } catch (e) {
       printLog(e);
@@ -51,8 +57,10 @@ class AuthService with ChangeNotifier {
 
   void decodeType(String token) {
     try {
-      final decodeType = JWT.decode(token);
-      typeUser = decodeType.payload['type'];
+      if (token.isNotEmpty) {
+        final decodeType = JWT.decode(token);
+        typeUser = decodeType.payload['type'];
+      }
       notifyListeners();
     } catch (e) {
       printLog(e);
@@ -144,9 +152,27 @@ class AuthService with ChangeNotifier {
     }
   }
 
+  Future<void> updateUser({required String id}) async {
+    try {
+      printLog("update token: $token, id: $id");
+      await apiService.patchApi(
+        path: '${APIpath.updateTokenFcmUser}/$id',
+        data: {'token': await createFCMToken()},
+        headers: {'Authorization': 'Bearer $token'},
+      ).then((value) {
+        printLog("update token: $value");
+      }).catchError((e) {
+        printLog(e);
+      });
+    } catch (e) {
+      printLog(e);
+    }
+  }
+
   Future<String> createFCMToken() async {
     FirebaseMessaging fcm = FirebaseMessaging.instance;
     String? token = await fcm.getToken();
+    printLog("fcm: $token");
     return token ?? '';
   }
 }

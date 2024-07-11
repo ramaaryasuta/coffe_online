@@ -1,4 +1,5 @@
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
+import 'package:coffeonline/utils/date_convert.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -67,8 +68,9 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                 itemBuilder: (context, index) {
                   final data = orderProv.historyOrder[index];
                   return ListTile(
-                    title: Text('Pesanan ID ${data.id}'),
-                    subtitle: Text(' Status : ${data.status}'),
+                    title: Text('Kopi ${data.merchant.user.name}'),
+                    subtitle: Text('${data.address}'),
+                    trailing: Text('${formatDateTime(data.doneAt!)}'),
                   );
                 },
               ),

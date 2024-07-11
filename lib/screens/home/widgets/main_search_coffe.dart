@@ -1,4 +1,5 @@
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
+import 'package:coffeonline/screens/home/widgets/map_user.dart';
 import 'package:coffeonline/screens/login/provider/auth_service.dart';
 import 'package:coffeonline/screens/home-merchant/provider/merchant_service.dart';
 import 'package:coffeonline/utils/loading.dart';
@@ -24,31 +25,78 @@ class _SearchCoffeState extends State<SearchCoffe> {
   @override
   Widget build(BuildContext context) {
     final providerMerch = context.watch<MerchantService>();
+    final orderProv = context.read<OrderService>();
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            providerMerch.listMerchant.isNotEmpty
-                ? Text(
-                    'ada ${providerMerch.listMerchant.length} kopi favorit\n Berada didekat mu, loh!',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(),
-                  )
-                : Text(
-                    'Temukan Kopi Terdekat',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge!.copyWith(),
-                  ),
-            const SizedBox(height: 10),
-            MyButton(
-              onPressed: () {
-                requestPermissionAndGetLocation();
-              },
-              child: const Text(
-                'Cek Sekarang',
-                style: TextStyle(color: Colors.white),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                providerMerch.listMerchant.isNotEmpty
+                    ? Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Text(
+                              'ada ${providerMerch.listMerchant.length} kopi favorit\n Berada didekat mu, loh!',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .copyWith(),
+                            ),
+                            const SizedBox(height: 10),
+                            Expanded(
+                              child: Container(
+                                child: UserMap(
+                                  latitudeBuyer: orderProv.myLat,
+                                  longitudeBuyer: orderProv.myLong,
+                                  coordinates: providerMerch.listMerchant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Temukan Kopi Terdekat',
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge!
+                                .copyWith(),
+                          ),
+                        ],
+                      ),
+              ],
+            ),
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: MyButton(
+                  onPressed: () {
+                    requestPermissionAndGetLocation();
+                  },
+                  child: providerMerch.listMerchant.isNotEmpty
+                      ? const Text(
+                          'Refresh',
+                          style: TextStyle(color: Colors.white),
+                        )
+                      : const Text(
+                          'Cari Sekarang',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                ),
               ),
             ),
           ],

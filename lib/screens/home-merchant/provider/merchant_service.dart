@@ -40,7 +40,9 @@ class MerchantService with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        printLog(response.data);
         var list = response.data as List;
+        printLog(list);
         listMerchant = list.map((e) => Merchant.fromJson(e)).toList();
         notifyListeners();
       } else {
@@ -93,8 +95,8 @@ class MerchantService with ChangeNotifier {
     required String token,
     required String latitude,
     required String longitude,
-    required String stock,
-    required String price,
+    required String? stock,
+    required String? price,
     // param kirim file untuk avatar
   }) async {
     try {
@@ -104,8 +106,8 @@ class MerchantService with ChangeNotifier {
         data: {
           "latitude": latitude,
           "longitude": longitude,
-          "stock": stock,
-          "price": price,
+          "stock": stock!.isEmpty ? null : stock,
+          "price": price!.isEmpty ? null : price,
         },
       );
 

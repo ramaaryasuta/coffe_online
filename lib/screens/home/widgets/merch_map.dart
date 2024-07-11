@@ -106,24 +106,6 @@ class _MapScreenState extends State<MerchMap> {
 
   @override
   Widget build(BuildContext context) {
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: Text(
-    //       'Mode Merchant',
-    //       style: Theme.of(context).textTheme.titleLarge,
-    //     ),
-    //   ),
-    //   body: GoogleMap(
-    //     onMapCreated: _onMapCreated,
-    //     initialCameraPosition: CameraPosition(
-    //       target: buyerLoc!,
-    //       zoom: 13.0,
-    //     ),
-    //     markers: _markers,
-    //     polylines: _polyLines,
-    //   ),
-    //   body:
-    // );
     return GoogleMap(
       onMapCreated: _onMapCreated,
       initialCameraPosition: CameraPosition(

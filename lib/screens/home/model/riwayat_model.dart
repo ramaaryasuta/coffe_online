@@ -13,6 +13,7 @@ class HistoryModel {
   DateTime createdAt;
   DateTime updatedAt;
   Merchant merchant;
+  MerchantUser user;
 
   HistoryModel({
     required this.id,
@@ -29,6 +30,7 @@ class HistoryModel {
     required this.createdAt,
     required this.updatedAt,
     required this.merchant,
+    required this.user,
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +49,7 @@ class HistoryModel {
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       merchant: Merchant.fromJson(json['Merchant']),
+      user: MerchantUser.fromJson(json['User']),
     );
   }
 

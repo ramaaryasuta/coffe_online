@@ -39,7 +39,10 @@ class _IntroPageState extends State<IntroPage> {
                   (value) {
                     if (authProv.token.isNotEmpty ||
                         authProv.userData != null) {
-                      Navigator.pushReplacementNamed(context, '/');
+                      printLog(
+                          "data user: ${authProv.userData!.id.toString()}");
+                      authProv.updateUser(id: authProv.userData!.id.toString());
+                      Navigator.pushReplacementNamed(context, '/home');
                     } else {
                       Navigator.pushReplacementNamed(context, '/login');
                     }
@@ -57,11 +60,9 @@ class _IntroPageState extends State<IntroPage> {
     final authProv = context.read<AuthService>();
     LoadingDialog.show(context, message: 'Mendapatkan data user');
     try {
-      printLog('udah ngeget');
       await authProv.getUserData(
         authProv.userId!,
       );
-      printLog('berhasil ${authProv.userData!.type}');
     } catch (e) {
       printLog(e);
     }

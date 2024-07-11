@@ -45,7 +45,7 @@ class _CheckOrderButtonState extends State<CheckOrderButton> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushReplacementNamed(context, '/');
+              Navigator.pushReplacementNamed(context, '/home');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black54,
@@ -110,9 +110,9 @@ class _CheckOrderButtonState extends State<CheckOrderButton> {
                       Text('Penjual',
                           style: Theme.of(context).textTheme.titleLarge),
                       Text(
-                          '- ${dataOngoing!.merchant.user.name} Menerima Pesanan'),
+                          '- ${dataOngoing!.merchant!.user.name} Menerima Pesanan'),
                       Text(
-                          '- Dapat Dohubungi pada nomor : ${dataOngoing.merchant.user.phoneNumber} '),
+                          '- Dapat Dohubungi pada nomor : ${dataOngoing.merchant!.user.phoneNumber} '),
                     ],
                   ),
                 ),
