@@ -1,6 +1,4 @@
 import 'package:coffeonline/screens/home-merchant/models/merchant_model.dart';
-import 'package:coffeonline/utils/print_log.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 

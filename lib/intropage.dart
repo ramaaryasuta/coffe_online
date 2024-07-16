@@ -3,6 +3,7 @@ import 'package:coffeonline/utils/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'screens/home/provider/order_service.dart';
 import 'screens/login/provider/auth_service.dart';
 import 'utils/print_log.dart';
 
@@ -17,6 +18,7 @@ class _IntroPageState extends State<IntroPage> {
   @override
   Widget build(BuildContext context) {
     final authProv = context.watch<AuthService>();
+    final orderProv = context.read<OrderService>();
     return Scaffold(
       body: Center(
         child: Column(
@@ -35,6 +37,7 @@ class _IntroPageState extends State<IntroPage> {
                     ),
               ),
               onPressed: () {
+                orderProv.historyOrder.clear();
                 setDataUser().then(
                   (value) {
                     if (authProv.token.isNotEmpty ||

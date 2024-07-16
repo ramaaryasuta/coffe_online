@@ -1,8 +1,5 @@
 import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../home/provider/order_service.dart';
 import '../../home/widgets/button_order.dart';
 
 // ignore: must_be_immutable

@@ -224,7 +224,7 @@ class OrderService with ChangeNotifier {
         historyOrder.clear();
         var data = response.data as List;
         historyOrder = await data.map((e) => HistoryModel.fromJson(e)).toList();
-        printLog("historyOrder: $historyOrder.length");
+        printLog('BERSHASIL MENGAMBIL Riwayat User');
         notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');

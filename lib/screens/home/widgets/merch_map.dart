@@ -1,8 +1,8 @@
-import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+// ignore: must_be_immutable
 class MerchMap extends StatefulWidget {
   MerchMap({
     super.key,

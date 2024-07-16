@@ -1,6 +1,8 @@
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/orders/waiting_accept.dart';
 import 'package:coffeonline/utils/date_convert.dart';
+import 'package:coffeonline/utils/loading.dart';
+import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,12 +27,15 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
         actions: [
           IconButton(
             onPressed: () {
+              LoadingDialog.show(context, message: 'Mengambil data...');
+              printLog('Refresh app bar');
               setState(() {
                 orderProv.getOrderByUser(
                   token: authProv.token,
                   userId: authProv.userData!.id.toString(),
                 );
               });
+              LoadingDialog.hide(context);
             },
             icon: const Icon(Icons.refresh),
           )
@@ -50,11 +55,14 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                     child:
                         Text('Refresh', style: TextStyle(color: Colors.white)),
                     onPressed: () {
+                      printLog('Dari button tengah');
+                      LoadingDialog.show(context, message: 'Mengambil data...');
                       setState(() {
                         orderProv.getOrderByUser(
                           token: authProv.token,
                           userId: authProv.userData!.id.toString(),
                         );
+                        LoadingDialog.hide(context);
                       });
                     },
                   ),

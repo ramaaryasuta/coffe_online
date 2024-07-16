@@ -2,7 +2,6 @@ import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/orders/map_screen.dart';
 import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:coffeonline/utils/print_log.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/socket/socket_service.dart';
 import '../home/provider/order_service.dart';
 import '../login/provider/auth_service.dart';
-import 'widgets/text_menu.dart';
 
 class WaitingAccept extends StatefulWidget {
   const WaitingAccept({super.key, this.id});
