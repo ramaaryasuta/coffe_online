@@ -200,8 +200,6 @@ class _OrderButtonState extends State<OrderButton> {
         maxPrice: budgetController.text,
         address: addressController.text,
         note: noteController.text,
-        longitudeBuyer: -122.4180,
-        latitudeBuyer: 37.7740,
         userId: userProv.userId!,
       );
     } catch (e) {

@@ -39,12 +39,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Configure message handlers
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      printLog('Received a message while in the foreground!');
-      printLog('Message data: ${message.data}');
-
-      if (message.notification != null) {
-        printLog(
-            'Message also contained a notification: ${message.notification}');
+      if (message.notification != null &&
+          message.notification!.title != 'New Order') {
+        showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text(message.notification!.title ?? 'No Title'),
+              content: Text(message.notification!.body ?? 'No Body'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       }
     });
 
@@ -61,6 +74,25 @@ class _HomeScreenState extends State<HomeScreen> {
         .then((RemoteMessage? message) {
       if (message != null) {
         printLog('App launched by notification: ${message.notification}');
+        if (message.notification != null) {
+          showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(message.notification!.title ?? 'No Title'),
+                content: Text(message.notification!.body ?? 'No Body'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
       }
     });
   }
@@ -68,17 +100,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MerchantService>();
-    final authProv = context.read<AuthService>();
-    printLog(authProv.typeUser);
+    final authProv = context.watch<AuthService>();
     return Scaffold(
-      body: SafeArea(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Column(
           children: [
             const HeaderUserAccount(),
-            if (authProv.typeUser == 'merchant') ...[
-              MerchMenu(),
-            ],
-            if (authProv.typeUser == 'user') ...[
+            if (authProv.userData != null &&
+                authProv.userData!.type == 'merchant') ...[MerchMenu()],
+            if (authProv.userData != null &&
+                authProv.userData!.type == 'user') ...[
               const MenuContainer(),
               const SearchCoffe(),
               Visibility(
