@@ -2,6 +2,7 @@ import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/orders/map_screen.dart';
 import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:coffeonline/utils/print_log.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,7 +13,9 @@ import '../login/provider/auth_service.dart';
 import 'widgets/text_menu.dart';
 
 class WaitingAccept extends StatefulWidget {
-  const WaitingAccept({super.key});
+  const WaitingAccept({super.key, this.id});
+
+  final String? id;
 
   @override
   State<WaitingAccept> createState() => _WaitingAcceptState();
@@ -27,21 +30,44 @@ class _WaitingAcceptState extends State<WaitingAccept> {
     super.initState();
     final socketService = Provider.of<SocketServices>(context, listen: false);
     final userProv = Provider.of<AuthService>(context, listen: false);
+    final orderProv = Provider.of<OrderService>(context, listen: false);
 
-    socketService.socket.connect();
-    socketService.socket.on('${userProv.userId}-ongoing-order', _handleOrder);
+    printLog('ini id ${widget.id}');
+
+    if (widget.id != null) {
+      final response = orderProv.getOrderById(
+        token: userProv.token,
+        orderId: widget.id!,
+      );
+
+      response.then((value) {
+        if (mounted) {
+          setState(() {
+            isAcceptedOrder = true;
+          });
+        }
+      });
+    } else {
+      socketService.socket.connect();
+      socketService.socket.on('${userProv.userId}-ongoing-order', _handleOrder);
+    }
   }
 
   void _handleOrder(dynamic data) async {
+    final userProv = Provider.of<AuthService>(context, listen: false);
+    final orderProv = Provider.of<OrderService>(context, listen: false);
     printLog('Socket mencari penjual acc');
-    printLog(data);
-    order = await OngoingResponse.fromJson(data);
-    if (mounted) {
-      setState(() {
-        printLog('ini order $order');
-        isAcceptedOrder = true;
-      });
-    }
+    final response = orderProv.getOrderById(
+      token: userProv.token,
+      orderId: data['id'].toString(),
+    );
+    response.then((value) {
+      if (mounted) {
+        setState(() {
+          isAcceptedOrder = true;
+        });
+      }
+    });
   }
 
   @override
@@ -55,7 +81,7 @@ class _WaitingAcceptState extends State<WaitingAccept> {
 
   @override
   Widget build(BuildContext context) {
-    final orderProv = Provider.of<OrderService>(context, listen: true);
+    final orderData = context.watch<OrderService>();
 
     return Scaffold(
       body: Center(
@@ -72,35 +98,36 @@ class _WaitingAcceptState extends State<WaitingAccept> {
                 'Mencari Penjual yang siap melayani',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              Card(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MenuTextDetail(
-                        text:
-                            '- Jumlah Gelas: ${orderProv.orderResponse!.amount}',
-                      ),
-                      MenuTextDetail(
-                        text:
-                            '- Harga Maksimal: ${orderProv.orderResponse!.totalPrice}',
-                      ),
-                      MenuTextDetail(
-                        text:
-                            '- Alamat Kamu: ${orderProv.orderResponse!.address}',
-                      ),
-                      MenuTextDetail(
-                        text:
-                            '- Catatan: ${orderProv.orderResponse!.addressDetail}',
-                      ),
-                      MenuTextDetail(
-                        text: '- Order ID: ${orderProv.orderResponse!.id}',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              // Card(
+              //   child: Container(
+              //     padding: const EdgeInsets.all(20),
+              //     child: Column(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       children: [
+              //         MenuTextDetail(
+              //           text:
+              //               '- Jumlah Gelas: ${orderData.ongoingResponse != null ? orderData.ongoingResponse!.amount : 0}',
+              //         ),
+              //         MenuTextDetail(
+              //           text:
+              //               '- Harga Maksimal: ${orderData.ongoingResponse != null ? orderData.ongoingResponse!.totalPrice : 0}',
+              //         ),
+              //         MenuTextDetail(
+              //           text:
+              //               '- Alamat Kamu: ${orderData.ongoingResponse != null ? orderData.ongoingResponse!.address : ''}',
+              //         ),
+              //         MenuTextDetail(
+              //           text:
+              //               '- Catatan: ${orderData.ongoingResponse != null ? orderData.ongoingResponse!.addressDetail : ''}',
+              //         ),
+              //         MenuTextDetail(
+              //           text:
+              //               '- Order ID: ${orderData.ongoingResponse != null ? orderData.ongoingResponse!.id : ''}',
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
             ],
             if (isAcceptedOrder) ...[
               SvgPicture.asset(
@@ -126,7 +153,7 @@ class _WaitingAcceptState extends State<WaitingAccept> {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) {
                       return MapScreen(
-                        ongoingData: order!,
+                        ongoingData: orderData.ongoingResponse!,
                       );
                     },
                   ));

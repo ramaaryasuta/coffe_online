@@ -1,4 +1,5 @@
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
+import 'package:coffeonline/screens/orders/waiting_accept.dart';
 import 'package:coffeonline/utils/date_convert.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -68,10 +69,17 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                 itemBuilder: (context, index) {
                   final data = orderProv.historyOrder[index];
                   return ListTile(
-                    title: Text('Kopi ${data.merchant.user.name}'),
-                    subtitle: Text('${data.address}'),
-                    trailing: Text('${formatDateTime(data.doneAt!)}'),
-                  );
+                      title: Text('Kopi ${data.merchant.user.name}'),
+                      subtitle: Text('${data.address}'),
+                      trailing: data.doneAt != null
+                          ? Text('${formatDateTime(data.doneAt!)}')
+                          : Text('Dalam Proses'),
+                      onTap: () => data.doneAt == null
+                          ? Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) {
+                              return WaitingAccept(id: data.id.toString());
+                            }))
+                          : null);
                 },
               ),
             )

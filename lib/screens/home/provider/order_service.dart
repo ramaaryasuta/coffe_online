@@ -223,8 +223,8 @@ class OrderService with ChangeNotifier {
       if (response.statusCode == 200) {
         historyOrder.clear();
         var data = response.data as List;
-        historyOrder = data.map((e) => HistoryModel.fromJson(e)).toList();
-        printLog(historyOrder.length);
+        historyOrder = await data.map((e) => HistoryModel.fromJson(e)).toList();
+        printLog("historyOrder: $historyOrder.length");
         notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');

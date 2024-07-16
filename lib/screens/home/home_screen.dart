@@ -102,25 +102,23 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<MerchantService>();
     final authProv = context.watch<AuthService>();
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            children: [
-              const HeaderUserAccount(),
-              if (authProv.userData != null &&
-                  authProv.userData!.type == 'merchant') ...[MerchMenu()],
-              if (authProv.userData != null &&
-                  authProv.userData!.type == 'user') ...[
-                const MenuContainer(),
-                const SearchCoffe(),
-                Visibility(
-                  visible: provider.listMerchant.isNotEmpty,
-                  child: const OrderButton(),
-                )
-              ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          children: [
+            const HeaderUserAccount(),
+            if (authProv.userData != null &&
+                authProv.userData!.type == 'merchant') ...[MerchMenu()],
+            if (authProv.userData != null &&
+                authProv.userData!.type == 'user') ...[
+              const MenuContainer(),
+              const SearchCoffe(),
+              Visibility(
+                visible: provider.listMerchant.isNotEmpty,
+                child: const OrderButton(),
+              )
             ],
-          ),
+          ],
         ),
       ),
     );

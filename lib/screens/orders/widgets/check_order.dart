@@ -63,7 +63,6 @@ class _CheckOrderButtonState extends State<CheckOrderButton> {
   }
 
   void showCekOrder(BuildContext context, {OngoingResponse? dataOngoing}) {
-    final provider = context.read<OrderService>();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -92,10 +91,11 @@ class _CheckOrderButtonState extends State<CheckOrderButton> {
                     children: [
                       Text('Ini Pesananmu',
                           style: Theme.of(context).textTheme.titleLarge),
-                      Text('- ${provider.amountCoffe} Gelas Kopi'),
-                      Text('- Dengan Harga maksimal Rp.${provider.maxPrice}'),
-                      Text('- Alamat kamu berada di ${provider.address}'),
-                      Text('- Dengan catatan ${provider.note}'),
+                      Text('- ${dataOngoing!.amount} Gelas Kopi'),
+                      Text(
+                          '- Dengan Harga maksimal Rp.${dataOngoing.totalPrice}'),
+                      Text('- Alamat kamu berada di ${dataOngoing.address}'),
+                      Text('- Dengan catatan ${dataOngoing.addressDetail}'),
                     ],
                   ),
                 ),
@@ -110,9 +110,9 @@ class _CheckOrderButtonState extends State<CheckOrderButton> {
                       Text('Penjual',
                           style: Theme.of(context).textTheme.titleLarge),
                       Text(
-                          '- ${dataOngoing!.merchant!.user.name} Menerima Pesanan'),
+                          '- ${dataOngoing.merchant.user.name} Menerima Pesanan'),
                       Text(
-                          '- Dapat Dohubungi pada nomor : ${dataOngoing.merchant!.user.phoneNumber} '),
+                          '- Dapat Dohubungi pada nomor : ${dataOngoing.merchant.user.phoneNumber} '),
                     ],
                   ),
                 ),

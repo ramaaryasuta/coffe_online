@@ -149,8 +149,8 @@ class _MerchOrderState extends State<MerchOrder> {
                     child: MerchMap(
                       latitudeBuyer: order.latitudeBuyer,
                       longitudeBuyer: order.longitudeBuyer,
-                      latitudeMerchant: order.merchant!.latitude,
-                      longitudeMerchant: order.merchant!.longitude,
+                      latitudeMerchant: order.merchant.latitude,
+                      longitudeMerchant: order.merchant.longitude,
                     ),
                   ),
                   if (order.doneAt == null) ...[
@@ -160,7 +160,6 @@ class _MerchOrderState extends State<MerchOrder> {
                             style: TextStyle(color: Colors.white)),
                         onPressed: () {
                           _completeOrder();
-                          Navigator.pop(context);
                         },
                       ),
                     ),

@@ -65,15 +65,12 @@ class _MerchMenuState extends State<MerchMenu> {
 
     socketService.socket.connect();
     socketService.socket.on('${userProv.userId}-request-order', (data) {
-      printLog('Socket mencari penjual...');
+      printLog('Socket mencari penjual..., $data');
       order = OrderResponse.fromJson(data);
-      printLog("order $order, count ${merchProv.count}");
+      printLog("order ${order!.id}, count ${merchProv.count}");
       if (merchProv.count < 1) {
-        if (order != orderPrev) {
-          orderPrev = order;
-          _showOrderDialog(context, order!, userProv);
-          merchProv.incrementCount();
-        }
+        _showOrderDialog(context, order!, userProv);
+        merchProv.incrementCount();
       }
     });
 
@@ -288,125 +285,120 @@ class _MerchMenuState extends State<MerchMenu> {
       }
     }
 
-    if (order != null) {
-      getLocation().then((_) => showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return Dialog(
-                  insetPadding: EdgeInsets.all(0),
-                  child: Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: Column(
-                      children: [
-                        AppBar(
-                          title: Text('Request Order'),
-                          automaticallyImplyLeading: false,
-                          actions: [
-                            IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () {
-                                merchProv.decrementCount();
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: Container(
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text("Jumlah Kopi"),
-                                        Text(
-                                          order.amount.toString(),
+    getLocation().then((_) => showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+                insetPadding: EdgeInsets.all(0),
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Column(
+                    children: [
+                      AppBar(
+                        title: Text('Request Order'),
+                        automaticallyImplyLeading: false,
+                        actions: [
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () {
+                              merchProv.decrementCount();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                      Expanded(
+                        child: Container(
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text("Jumlah Kopi"),
+                                      Text(
+                                        order.amount.toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text("Estimasi Biaya"),
+                                      Text(
+                                          formatPrice(
+                                              double.parse(order.totalPrice)),
                                           style: Theme.of(context)
                                               .textTheme
-                                              .titleLarge,
-                                        ),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        Text("Estimasi Biaya"),
-                                        Text(
-                                            formatPrice(
-                                                double.parse(order.totalPrice)),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                ListTile(
-                                  title: Text(
-                                    order.user.name.toUpperCase(),
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
+                                              .titleLarge),
+                                    ],
                                   ),
-                                  subtitle: Text(
-                                      "Alamat: ${order.address} \nCatatan: ${order.addressDetail}"),
+                                ],
+                              ),
+                              ListTile(
+                                title: Text(
+                                  order.user.name.toUpperCase(),
+                                  style: Theme.of(context).textTheme.titleLarge,
                                 ),
-                                Container(
-                                    padding: EdgeInsets.all(18),
-                                    margin: EdgeInsets.only(bottom: 20),
-                                    height: 400,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    child: MerchMap(
-                                      latitudeBuyer: order.latitudeBuyer,
-                                      longitudeBuyer: order.longitudeBuyer,
-                                      latitudeMerchant: lat,
-                                      longitudeMerchant: long,
-                                    )),
-                                MyButton(
-                                  child: Text(
-                                    'Terima Order',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge!
-                                        .copyWith(color: Colors.white),
-                                  ),
-                                  onPressed: () {
-                                    _orderService.ongoingOrder(
-                                      token: userProv.token,
-                                      merchantId:
-                                          userProv.userData!.merchId.toString(),
-                                      orderId: order.id.toString(),
-                                    );
-                                    merchProv.decrementCount();
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst);
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                      builder: (context) {
-                                        return MerchOrder(
-                                          orderId: order.id.toString(),
-                                        );
-                                      },
-                                    ));
-                                  },
+                                subtitle: Text(
+                                    "Alamat: ${order.address} \nCatatan: ${order.addressDetail}"),
+                              ),
+                              Container(
+                                  padding: EdgeInsets.all(18),
+                                  margin: EdgeInsets.only(bottom: 20),
+                                  height: 400,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: MerchMap(
+                                    latitudeBuyer: order.latitudeBuyer,
+                                    longitudeBuyer: order.longitudeBuyer,
+                                    latitudeMerchant: lat,
+                                    longitudeMerchant: long,
+                                  )),
+                              MyButton(
+                                child: Text(
+                                  'Terima Order',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(color: Colors.white),
                                 ),
-                              ],
-                            ),
+                                onPressed: () {
+                                  _orderService.ongoingOrder(
+                                    token: userProv.token,
+                                    merchantId:
+                                        userProv.userData!.merchId.toString(),
+                                    orderId: order.id.toString(),
+                                  );
+                                  merchProv.decrementCount();
+                                  Navigator.of(context)
+                                      .popUntil((route) => route.isFirst);
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) {
+                                      return MerchOrder(
+                                        orderId: order.id.toString(),
+                                      );
+                                    },
+                                  ));
+                                },
+                              ),
+                            ],
                           ),
-                        )
-                      ],
-                    ),
-                  ));
-            },
-          ).then((value) => {
-                merchProv.decrementCount(),
-              }));
-    }
+                        ),
+                      )
+                    ],
+                  ),
+                ));
+          },
+        ).then((value) => {
+              merchProv.decrementCount(),
+            }));
   }
 }
