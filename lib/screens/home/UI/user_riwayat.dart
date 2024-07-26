@@ -1,3 +1,4 @@
+import 'package:coffeonline/screens/home/model/riwayat_model.dart';
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/orders/waiting_accept.dart';
 import 'package:coffeonline/utils/date_convert.dart';
@@ -91,7 +92,7 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                             MaterialPageRoute(builder: (context) {
                             return WaitingAccept(id: data.id.toString());
                           }))
-                        : null,
+                        : _detailOrderDialog(data),
                     child: Card(
                       elevation: 4.0,
                       margin:
@@ -116,23 +117,6 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                                 color: Colors.grey[600],
                               ),
                             ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              'Harga: Rp.${data.totalPrice}',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              'Jumlah Pesanan: ${data.amount} pcs',
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
                             Align(
                               alignment: Alignment.centerRight,
                               child: data.doneAt != null
@@ -162,6 +146,76 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
           ]
         ],
       ),
+    );
+  }
+
+  _detailOrderDialog(HistoryModel data) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Detail Pesanan ID: ${data.id}',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Divider(),
+                Text(
+                  'Penjual : Kopi ${data.merchant.user.name}',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Status pesanan: ${data.doneAt != null ? 'Selesai' : 'Dalam Proses'} pada ${formatDateTime(data.doneAt!)}',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Total : ${data.amount} Gelas Kopi',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Alamat Pesanan: ${data.address}',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Catatan: ${data.addressDetail}',
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Total Harga: Rp.${data.totalPrice}',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                  ),
+                ),
+                const Divider(),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: MyButton(
+                    child: const Text('Tutup',
+                        style: TextStyle(color: Colors.white)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
