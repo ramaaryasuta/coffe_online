@@ -1,12 +1,9 @@
-import 'package:coffeonline/screens/home-merchant/provider/merchant_service.dart';
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
-import 'package:coffeonline/utils/loading.dart';
-import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../../login/provider/auth_service.dart';
+import '../provider/order_service.dart';
 
 class HeaderUserAccount extends StatefulWidget {
   const HeaderUserAccount({
@@ -18,155 +15,96 @@ class HeaderUserAccount extends StatefulWidget {
 }
 
 class _HeaderUserAccountState extends State<HeaderUserAccount> {
-  TextEditingController stockController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
-
-  bool _serviceEnabled = false;
-  LocationPermission _permission = LocationPermission.denied;
-
-  @override
-  void dispose() {
-    stockController.dispose();
-    priceController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthService>();
+    final orderProv = context.read<OrderService>();
     return Container(
       margin: const EdgeInsets.only(top: 20),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 30,
-            backgroundImage: NetworkImage(
-                'https://cdn.frankerfacez.com/avatar/twitch/111568438'),
-          ),
-          const SizedBox(width: 20),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Hallo, ${provider.userData?.name ?? 'User'}!',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 5),
-              if (provider.userData?.type == 'user') ...[
-                Text('Mau Ngopi Kapan nih?',
-                    style: Theme.of(context).textTheme.bodySmall),
-              ],
-              if (provider.userData?.type == 'merchant') ...[
-                Text('Tetap hati-hati',
-                    style: Theme.of(context).textTheme.bodySmall),
-              ]
-            ],
-          ),
-          const Spacer(),
-          if (provider.userData?.type == 'merchant') ...[
-            IconButton(
-              onPressed: () {
-                showDialogMerch();
-              },
-              icon: const Icon(Icons.settings),
-            )
-          ]
-        ],
-      ),
-    );
-  }
-
-  void showDialogMerch() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Perbarui Merchant Info'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+      child: Row(children: [
+        const CircleAvatar(
+          radius: 30,
+          backgroundImage: NetworkImage(
+              'https://img.freepik.com/free-photo/fresh-coffee-steams-wooden-table-close-up-generative-ai_188544-8923.jpg'),
+        ),
+        const SizedBox(width: 20),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: stockController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Stock',
-              ),
-            ),
-            TextField(
-              controller: priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Harga Satuan',
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            MyButton(
-              child: const Text('Perbarui Data & Lokasi',
-                  style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                updateMerchInfo().then((value) => Navigator.pop(context));
-              },
-            )
+            Text('Welcome, ${provider.userData?.name ?? 'User'}!',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 5),
+            if (provider.userData?.type == 'user') ...[
+              Text('Mau Pesan apa hari ini?',
+                  style: Theme.of(context).textTheme.bodySmall),
+            ],
+            if (provider.userData?.type == 'merchant') ...[
+              Text('Siap berjualan dengan semangat!',
+                  style: Theme.of(context).textTheme.bodySmall),
+            ]
           ],
         ),
-      ),
+        const Spacer(),
+        IconButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return Dialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'Logout',
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10.0),
+                        const Text('Apakah anda yakin ingin keluar?'),
+                        const SizedBox(height: 10.0),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(width: 60.0),
+                            TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  'Batal',
+                                  style: TextStyle(color: Colors.black),
+                                )),
+                            const SizedBox(width: 10.0),
+                            MyButton(
+                              child: const Text('Logout',
+                                  style: TextStyle(color: Colors.white)),
+                              onPressed: () {
+                                orderProv.historyOrder.clear();
+                                provider.logout();
+                                Navigator.of(context)
+                                    .pushReplacementNamed('/login');
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+          icon: const Icon(Icons.logout),
+        )
+      ]),
     );
-  }
-
-  Future<void> updateMerchInfo() async {
-    final provider = context.read<MerchantService>();
-    final authProv = context.read<AuthService>();
-    LoadingDialog.show(context, message: 'Memuat Data...');
-    try {
-      // Periksa layanan lokasi aktif
-      _serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!_serviceEnabled) {
-        // Jika layanan tidak aktif, minta untuk diaktifkan
-        _serviceEnabled = await Geolocator.openLocationSettings();
-        if (!_serviceEnabled) {
-          return;
-        }
-      }
-
-      // Periksa izin lokasi
-      _permission = await Geolocator.checkPermission();
-      if (_permission == LocationPermission.denied) {
-        // Jika izin belum diberikan, minta izin
-        _permission = await Geolocator.requestPermission();
-        if (_permission == LocationPermission.denied) {
-          // Izin ditolak, berikan penanganan khusus di sini
-          // Misalnya, menampilkan pesan atau menavigasi ke pengaturan aplikasi
-          return;
-        }
-      }
-
-      if (_permission == LocationPermission.deniedForever) {
-        // Jika pengguna telah menolak untuk memberikan izin secara permanen
-        // Tindakan lebih lanjut, misalnya memberikan pesan tentang pengaturan aplikasi
-        return;
-      }
-
-      // Jika izin sudah diberikan, lanjutkan ke pengambilan lokasi
-      if (_permission == LocationPermission.whileInUse ||
-          _permission == LocationPermission.always) {
-        Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        );
-        printLog(
-            'Latitude: ${position.latitude}, Longitude: ${position.longitude}');
-        // Lakukan sesuatu dengan posisi yang diperoleh
-        await provider.updateMerchInfo(
-          id: authProv.userData!.merchId.toString(),
-          token: authProv.token,
-          latitude: position.latitude.toString(),
-          longitude: position.longitude.toString(),
-          stock: stockController.text,
-          price: priceController.text,
-        );
-        LoadingDialog.hide(context);
-      }
-    } catch (e) {
-      printLog('Error: $e');
-    }
   }
 }

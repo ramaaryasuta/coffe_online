@@ -1,5 +1,5 @@
 import 'package:coffeonline/screens/home/UI/user_riwayat.dart';
-import 'package:coffeonline/screens/profile/profile_screen.dart';
+import 'package:coffeonline/screens/home/subview/galery_coffe.dart';
 import 'package:flutter/material.dart';
 
 import '../../../styles/colors.dart';
@@ -31,11 +31,19 @@ class MenuContainer extends StatelessWidget {
         runSpacing: 10,
         alignment: WrapAlignment.spaceEvenly,
         children: [
-          // MenuButton(
-          //   icon: Icons.coffee_rounded,
-          //   title: 'Merchant',
-          //   onTap: () {},
-          // ),
+          MenuButton(
+            icon: Icons.coffee_outlined,
+            title: 'Kopi menu',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const GaleryCoffeScreem();
+                  },
+                ),
+              );
+            },
+          ),
           MenuButton(
             icon: Icons.history_rounded,
             title: 'Riwayat',
@@ -47,15 +55,6 @@ class MenuContainer extends StatelessWidget {
                   },
                 ),
               );
-            },
-          ),
-          MenuButton(
-            icon: Icons.person_2_rounded,
-            title: 'Profil',
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const ProfileScreen();
-              }));
             },
           ),
         ],

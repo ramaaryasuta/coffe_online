@@ -1,9 +1,9 @@
+import 'package:coffeonline/screens/home/UI/user_riwayat.dart';
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/home/widgets/merch_map.dart';
 import 'package:coffeonline/screens/home/widgets/merch_order.dart';
 import 'package:coffeonline/screens/login/provider/auth_service.dart';
 import 'package:coffeonline/screens/orders/models/order_model.dart';
-import 'package:coffeonline/utils/date_convert.dart';
 import 'package:coffeonline/utils/loading.dart';
 import 'package:coffeonline/utils/print_log.dart';
 import 'package:flutter/material.dart';
@@ -22,13 +22,25 @@ class MerchMenu extends StatefulWidget {
 }
 
 class _MerchMenuState extends State<MerchMenu> {
+  TextEditingController stockController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
   bool isRequestedOrder = false;
   OrderResponse? order;
   OrderResponse? orderPrev;
   bool isFetched = false;
   late Future<void> fetchOrderHistoryFuture;
 
-  void _fetchOrderHistory() async {
+  bool _serviceEnabled = false;
+  LocationPermission _permission = LocationPermission.denied;
+
+  @override
+  void dispose() {
+    stockController.dispose();
+    priceController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchOrderHistory() async {
     final authService = context.read<AuthService>();
     final orderService = context.read<OrderService>();
     printLog("function order merchant called ${authService.token}");
@@ -76,128 +88,118 @@ class _MerchMenuState extends State<MerchMenu> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12.0, 0.0, 8.0, 0.0),
-      child: Column(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  MyButton(
-                      child: const Text('Refresh Order',
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        _fetchOrderHistory();
-                      }),
-                  MyButton(
-                      child: const Text('Logout',
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        context.read<AuthService>().logout();
-                        Navigator.pushReplacementNamed(context, '/login');
-                      }),
-                ],
-              ),
-              if (_orderService.orderRequestResponse != null) ...[
-                Text('Request Order',
-                    style: Theme.of(context).textTheme.titleLarge),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await _fetchOrderHistory();
+        },
+        child: Column(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Container(
-                    width: double.infinity,
-                    height: 100,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          title:
-                              Text('${_orderService.orderRequestResponse!.id}'),
-                          subtitle: Text(
-                              'Alamat: ${_orderService.orderRequestResponse!.address}'),
-                          onTap: () {
-                            _showOrderDialog(context,
-                                _orderService.orderRequestResponse!, userProv);
-                            _orderService.resetOrderRequest();
-                            merchProv.decrementCount();
-                          },
-                        ),
-                      ],
-                    )),
-              ],
-              Text('Ongoing Order',
-                  style: Theme.of(context).textTheme.titleLarge),
-              Container(
-                width: double.infinity,
-                height: 150,
-                child: ListView.builder(
-                  itemCount: _orderService.historyOrder.length,
-                  itemBuilder: (context, index) {
-                    final order = _orderService.historyOrder[index];
-                    if (order.status == 'ongoing') {
-                      return Column(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
+                  width: double.infinity,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        offset: Offset(0.0, 1.0), //(x,y)
+                        blurRadius: 6.0,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      MyButton(
+                          child: const Text('Riwayat Pesanan jualan',
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) {
+                                return UserHistoryScreen();
+                              },
+                            ));
+                          }),
+                      MyButton(
+                          child: const Text('Perbarui Informasi',
+                              style: TextStyle(color: Colors.white)),
+                          onPressed: () {
+                            showDialogMerch();
+                          }),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (_orderService.orderRequestResponse != null) ...[
+                  Text('Request Order :',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  Container(
+                      width: double.infinity,
+                      height: 100,
+                      child: Column(
                         children: [
                           ListTile(
-                            title: Text('Order ID ${order.id}'),
-                            subtitle: Text('Alamat: ${order.address}'),
+                            title: Text(
+                                '${_orderService.orderRequestResponse!.id}'),
+                            subtitle: Text(
+                                'Alamat: ${_orderService.orderRequestResponse!.address}'),
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) {
-                                  return MerchOrder(
-                                    orderId: order.id.toString(),
-                                  );
-                                },
-                              ));
+                              _showOrderDialog(
+                                  context,
+                                  _orderService.orderRequestResponse!,
+                                  userProv);
+                              _orderService.resetOrderRequest();
+                              merchProv.decrementCount();
                             },
                           ),
-                          const Divider(),
                         ],
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
+                      )),
+                ],
+                Text('Ongoing Order :',
+                    style: Theme.of(context).textTheme.titleLarge),
+                Container(
+                  width: double.infinity,
+                  height: 150,
+                  child: ListView.builder(
+                    itemCount: _orderService.historyOrder.length,
+                    itemBuilder: (context, index) {
+                      final order = _orderService.historyOrder[index];
+                      if (order.status == 'ongoing') {
+                        return Column(
+                          children: [
+                            ListTile(
+                              title: Text('Order ID ${order.id}'),
+                              subtitle: Text('Alamat: ${order.address}'),
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) {
+                                    return MerchOrder(
+                                      orderId: order.id.toString(),
+                                    );
+                                  },
+                                ));
+                              },
+                            ),
+                            const Divider(),
+                          ],
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'History Order',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Container(
-                width: double.infinity,
-                height: (_orderService.orderRequestResponse != null)
-                    ? MediaQuery.of(context).size.height * 0.3
-                    : MediaQuery.of(context).size.height * 0.5,
-                child: ListView.builder(
-                  itemCount: _orderService.historyOrder.length,
-                  itemBuilder: (context, index) {
-                    final order = _orderService.historyOrder[index];
-                    if (order.status == 'completed') {
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Text('Order By ${order.user.name}'),
-                            subtitle: Text('Alamat : ${order.address}'),
-                            trailing: Text(
-                                formatDateTime(order.createdAt.toString())),
-                          ),
-                          const Divider(),
-                        ],
-                      );
-                    } else {
-                      return Container();
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -400,5 +402,100 @@ class _MerchMenuState extends State<MerchMenu> {
         ).then((value) => {
               merchProv.decrementCount(),
             }));
+  }
+
+  void showDialogMerch() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Perbarui Merchant Info'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: stockController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Stock',
+              ),
+            ),
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Harga Satuan',
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            MyButton(
+              child: const Text('Perbarui Data & Lokasi',
+                  style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                updateMerchInfo().then((value) => Navigator.pop(context));
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> updateMerchInfo() async {
+    final provider = context.read<MerchantService>();
+    final authProv = context.read<AuthService>();
+    LoadingDialog.show(context, message: 'Memuat Data...');
+    try {
+      // Periksa layanan lokasi aktif
+      _serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!_serviceEnabled) {
+        // Jika layanan tidak aktif, minta untuk diaktifkan
+        _serviceEnabled = await Geolocator.openLocationSettings();
+        if (!_serviceEnabled) {
+          return;
+        }
+      }
+
+      // Periksa izin lokasi
+      _permission = await Geolocator.checkPermission();
+      if (_permission == LocationPermission.denied) {
+        // Jika izin belum diberikan, minta izin
+        _permission = await Geolocator.requestPermission();
+        if (_permission == LocationPermission.denied) {
+          // Izin ditolak, berikan penanganan khusus di sini
+          // Misalnya, menampilkan pesan atau menavigasi ke pengaturan aplikasi
+          return;
+        }
+      }
+
+      if (_permission == LocationPermission.deniedForever) {
+        // Jika pengguna telah menolak untuk memberikan izin secara permanen
+        // Tindakan lebih lanjut, misalnya memberikan pesan tentang pengaturan aplikasi
+        return;
+      }
+
+      // Jika izin sudah diberikan, lanjutkan ke pengambilan lokasi
+      if (_permission == LocationPermission.whileInUse ||
+          _permission == LocationPermission.always) {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+        printLog(
+            'Latitude: ${position.latitude}, Longitude: ${position.longitude}');
+        // Lakukan sesuatu dengan posisi yang diperoleh
+        await provider.updateMerchInfo(
+          id: authProv.userData!.merchId.toString(),
+          token: authProv.token,
+          latitude: position.latitude.toString(),
+          longitude: position.longitude.toString(),
+          stock: stockController.text,
+          price: priceController.text,
+        );
+        LoadingDialog.hide(context);
+      }
+    } catch (e) {
+      printLog('Error: $e');
+    }
   }
 }

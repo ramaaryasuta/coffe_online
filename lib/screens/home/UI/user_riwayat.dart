@@ -29,12 +29,21 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
             onPressed: () {
               LoadingDialog.show(context, message: 'Mengambil data...');
               printLog('Refresh app bar');
-              setState(() {
-                orderProv.getOrderByUser(
-                  token: authProv.token,
-                  userId: authProv.userData!.id.toString(),
-                );
-              });
+              if (authProv.typeUser == 'user') {
+                setState(() {
+                  orderProv.getOrderByUser(
+                    token: authProv.token,
+                    userId: authProv.userData!.id.toString(),
+                  );
+                });
+              } else {
+                setState(() {
+                  orderProv.getOrderByMerchant(
+                    token: authProv.token,
+                    merchantId: authProv.userData!.merchId,
+                  );
+                });
+              }
               LoadingDialog.hide(context);
             },
             icon: const Icon(Icons.refresh),
@@ -76,18 +85,77 @@ class _UserHistoryScreenState extends State<UserHistoryScreen> {
                 itemCount: orderProv.historyOrder.length,
                 itemBuilder: (context, index) {
                   final data = orderProv.historyOrder[index];
-                  return ListTile(
-                      title: Text('Kopi ${data.merchant.user.name}'),
-                      subtitle: Text('${data.address}'),
-                      trailing: data.doneAt != null
-                          ? Text('${formatDateTime(data.doneAt!)}')
-                          : Text('Dalam Proses'),
-                      onTap: () => data.doneAt == null
-                          ? Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) {
-                              return WaitingAccept(id: data.id.toString());
-                            }))
-                          : null);
+                  return InkWell(
+                    onTap: () => data.doneAt == null
+                        ? Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) {
+                            return WaitingAccept(id: data.id.toString());
+                          }))
+                        : null,
+                    child: Card(
+                      elevation: 4.0,
+                      margin:
+                          EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Penjual : Kopi ${data.merchant.user.name}',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Alamat Pesanan: ${data.address}',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Harga: Rp.${data.totalPrice}',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Jumlah Pesanan: ${data.amount} pcs',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: data.doneAt != null
+                                  ? Text(
+                                      '${formatDateTime(data.doneAt!)}',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.grey[800],
+                                      ),
+                                    )
+                                  : Text(
+                                      'Dalam Proses',
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.grey[800],
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             )
