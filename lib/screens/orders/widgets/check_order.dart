@@ -1,14 +1,21 @@
+import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../home/provider/order_service.dart';
 import '../../home/widgets/button_order.dart';
 
-class CheckOrderButton extends StatelessWidget {
-  const CheckOrderButton({
+// ignore: must_be_immutable
+class CheckOrderButton extends StatefulWidget {
+  CheckOrderButton({
     super.key,
+    required this.dataOngoing,
   });
 
+  OngoingResponse dataOngoing;
+
+  @override
+  State<CheckOrderButton> createState() => _CheckOrderButtonState();
+}
+
+class _CheckOrderButtonState extends State<CheckOrderButton> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -25,15 +32,34 @@ class CheckOrderButton extends StatelessWidget {
                   .titleMedium!
                   .copyWith(color: Colors.white),
             ),
-            onPressed: () => showCekOrder(context),
+            onPressed: () =>
+                showCekOrder(context, dataOngoing: widget.dataOngoing),
           ),
         ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          height: 50,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/home');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black54,
+            ),
+            child: Text(
+              'Kembali Ke Halaman Utama',
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Colors.white,
+                  ),
+            ),
+          ),
+        )
       ],
     );
   }
 
-  void showCekOrder(BuildContext context) {
-    final provider = context.read<OrderService>();
+  void showCekOrder(BuildContext context, {OngoingResponse? dataOngoing}) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -53,10 +79,41 @@ class CheckOrderButton extends StatelessWidget {
                   ),
                 ],
               ),
-              Text('${provider.amountCoffe} Gelas Kopi'),
-              Text('Dengan Harga maksimal Rp.${provider.maxPrice}'),
-              Text('Alamat kamu berada di ${provider.address}'),
-              Text('Dengan catatan ${provider.note}'),
+              Card(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Ini Pesananmu',
+                          style: Theme.of(context).textTheme.titleLarge),
+                      Text('- ${dataOngoing!.amount} Gelas Kopi'),
+                      Text(
+                          '- Dengan Harga maksimal Rp.${dataOngoing.totalPrice}'),
+                      Text('- Alamat kamu berada di ${dataOngoing.address}'),
+                      Text('- Dengan catatan ${dataOngoing.addressDetail}'),
+                    ],
+                  ),
+                ),
+              ),
+              Card(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Penjual',
+                          style: Theme.of(context).textTheme.titleLarge),
+                      Text(
+                          '- ${dataOngoing.merchant.user.name} Menerima Pesanan'),
+                      Text(
+                          '- Dapat Dohubungi pada nomor : ${dataOngoing.merchant.user.phoneNumber} '),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         );

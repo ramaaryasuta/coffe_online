@@ -3,6 +3,7 @@ import 'package:coffeonline/screens/orders/models/ongoing_model.dart';
 import 'package:coffeonline/screens/orders/models/order_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/api.dart';
 import '../../../utils/api_path.dart';
@@ -10,17 +11,66 @@ import '../../../utils/print_log.dart';
 
 class OrderService with ChangeNotifier {
   final APIservice apiService = APIservice();
+  final APIservice? apiServiceOrder;
+
+  OrderService({this.apiServiceOrder});
 
   bool successOrder = false;
   OrderResponse? orderResponse;
+  OrderResponse? orderRequestResponse;
   OngoingResponse? ongoingResponse;
+  late int orderRequestId;
 
   List<HistoryModel> historyOrder = [];
+
+  double myLat = 0.0;
+  double myLong = 0.0;
 
   int? amountCoffe;
   String? maxPrice;
   String? address;
   String? note;
+
+  Future<void> saveRequest({required String id}) async {
+    orderRequestId = int.parse(id);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('orderRequestId', orderRequestId);
+    int idOrder = await prefs.getInt('orderRequestId')!;
+    printLog('save id: $idOrder');
+    notifyListeners();
+  }
+
+  Future<void> resetOrderRequest() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('orderRequestId');
+    orderRequestResponse = null;
+    notifyListeners();
+  }
+
+  Future<void> getOrderRequested({required String token}) async {
+    try {
+      printLog("getorderrequest");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int idOrder = await prefs.getInt('orderRequestId')!;
+      printLog("getOrderRequested ID: $idOrder");
+      Response response = await apiService.getApi(
+          path: '${APIpath.getOrderById}/$idOrder',
+          headers: {'Authorization': 'Bearer $token'});
+
+      if (response.statusCode == 200) {
+        orderRequestResponse = OrderResponse.fromJson(response.data);
+        if (orderRequestResponse!.merchantId != null) {
+          orderRequestResponse = null;
+          await prefs.remove('orderRequestId');
+        }
+        printLog(orderRequestResponse);
+        notifyListeners();
+      }
+      notifyListeners();
+    } catch (e) {
+      printLog(e);
+    }
+  }
 
   void saveOrderData({
     required int amountCoffe,
@@ -36,14 +86,18 @@ class OrderService with ChangeNotifier {
     notifyListeners();
   }
 
+  void saveMyLatLang(double lat, double long) {
+    myLat = lat;
+    myLong = long;
+    notifyListeners();
+  }
+
   Future<void> createOrder({
     required String token,
     required int amount,
     required String maxPrice,
     required String address,
     required String note,
-    required double longitudeBuyer,
-    required double latitudeBuyer,
     required int userId,
   }) async {
     try {
@@ -55,8 +109,8 @@ class OrderService with ChangeNotifier {
           "totalPrice": maxPrice,
           "address": address,
           "address_detail": note,
-          "latitude_buyer": latitudeBuyer,
-          "longitude_buyer": longitudeBuyer,
+          "latitude_buyer": myLat,
+          "longitude_buyer": myLong,
           "userID": userId
         },
       );
@@ -76,10 +130,11 @@ class OrderService with ChangeNotifier {
   Future<void> ongoingOrder({
     required String token,
     required String merchantId,
+    required String orderId,
   }) async {
     try {
       Response response = await apiService.postApi(
-        path: '${APIpath.ongoingOrder}/$merchantId',
+        path: '${APIpath.ongoingOrder}/$orderId',
         headers: {'Authorization': 'Bearer $token'},
         data: {"merchantID": merchantId},
       );
@@ -140,11 +195,14 @@ class OrderService with ChangeNotifier {
   }) async {
     try {
       Response response = await apiService.getApi(
-        path: '${APIpath.getOrderById}/$orderId}',
+        path: '${APIpath.getOrderById}/$orderId',
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         printLog(response.data);
+        ongoingResponse = OngoingResponse.fromJson(response.data);
+        printLog(ongoingResponse);
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }
@@ -163,7 +221,11 @@ class OrderService with ChangeNotifier {
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
-        printLog(response.data);
+        historyOrder.clear();
+        var data = response.data as List;
+        historyOrder = await data.map((e) => HistoryModel.fromJson(e)).toList();
+        printLog('BERSHASIL MENGAMBIL Riwayat User');
+        notifyListeners();
       } else {
         printLog('Gagal, code: ${response.data}');
       }
@@ -177,6 +239,7 @@ class OrderService with ChangeNotifier {
     required int? merchantId,
   }) async {
     try {
+      printLog("getOrderMerchant");
       Response response = await apiService.getApi(
         path: '${APIpath.getOrderByMerchant}/$merchantId}',
         headers: {'Authorization': 'Bearer $token'},
@@ -190,7 +253,7 @@ class OrderService with ChangeNotifier {
         printLog('Gagal, code: ${response.data}');
       }
     } catch (e) {
-      printLog(e);
+      printLog("error: $e");
     }
   }
 }
