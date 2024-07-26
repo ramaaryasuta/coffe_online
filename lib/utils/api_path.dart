@@ -5,6 +5,7 @@ class APIpath {
   static const String getUserData = '/api/user'; // By ID
   static const String updateTokenFcmUser =
       '/api/user'; // By ID (if fcm empty use this api to patch fcm token)
+  static const String changeName = '/api/user';
 
   /// ORDER
   static const String getOrderById = '/api/order/search'; // need param ID

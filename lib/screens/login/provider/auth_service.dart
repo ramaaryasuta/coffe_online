@@ -175,4 +175,23 @@ class AuthService with ChangeNotifier {
     printLog("fcm: $token");
     return token ?? '';
   }
+
+  Future<void> changeName({required String name, required int id}) async {
+    try {
+      Response response = await apiService.patchApi(
+        path: '${APIpath.changeName}/$id',
+        headers: {'Authorization': 'Bearer $token'},
+        data: {'name': name},
+      );
+      if (response.statusCode == 201) {
+        printLog(response.data);
+        getUserData(id);
+        notifyListeners();
+      } else {
+        printLog('Gagal, code: ${response.data}');
+      }
+    } catch (e) {
+      printLog(e);
+    }
+  }
 }

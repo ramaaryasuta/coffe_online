@@ -212,11 +212,24 @@ class _MerchMenuState extends State<MerchMenu> {
                       final coffee = coffeeList[index];
                       return Container(
                         width: 180.0, // Set the width of each item
-                        margin: EdgeInsets.symmetric(
-                            horizontal: 4.0), // Optional: Add some spacing
-                        child: Image.network(
-                          coffee["image"]!,
-                          fit: BoxFit.cover,
+                        margin: EdgeInsets.symmetric(horizontal: 4.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              offset: Offset(0.0, 1.0), //(x,y)
+                              blurRadius: 6.0,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: Image.network(
+                            coffee["image"]!,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       );
                     },

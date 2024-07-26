@@ -1,9 +1,8 @@
-import 'package:coffeonline/screens/home/widgets/button_order.dart';
+import 'package:coffeonline/screens/home/subview/setting.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../login/provider/auth_service.dart';
-import '../provider/order_service.dart';
 
 class HeaderUserAccount extends StatefulWidget {
   const HeaderUserAccount({
@@ -18,7 +17,6 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthService>();
-    final orderProv = context.read<OrderService>();
     return Container(
       margin: const EdgeInsets.only(top: 20),
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -48,59 +46,11 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
         const Spacer(),
         IconButton(
           onPressed: () {
-            showDialog(
-              context: context,
+            Navigator.push(context, MaterialPageRoute(
               builder: (context) {
-                return Dialog(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'Logout',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10.0),
-                        const Text('Apakah anda yakin ingin keluar?'),
-                        const SizedBox(height: 10.0),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const SizedBox(width: 60.0),
-                            TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text(
-                                  'Batal',
-                                  style: TextStyle(color: Colors.black),
-                                )),
-                            const SizedBox(width: 10.0),
-                            MyButton(
-                              child: const Text('Logout',
-                                  style: TextStyle(color: Colors.white)),
-                              onPressed: () {
-                                orderProv.historyOrder.clear();
-                                provider.logout();
-                                Navigator.of(context)
-                                    .pushReplacementNamed('/login');
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return SettingSCreen();
               },
-            );
+            ));
           },
           icon: const Icon(Icons.logout),
         )
