@@ -52,7 +52,7 @@ class _HeaderUserAccountState extends State<HeaderUserAccount> {
               },
             ));
           },
-          icon: const Icon(Icons.logout),
+          icon: const Icon(Icons.settings),
         )
       ]),
     );

@@ -66,11 +66,13 @@ class GaleryCoffeScreem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
+                Container(
+                  height: 100, // Set the desired height for the image
+                  width:
+                      double.infinity, // Set the width to match the card width
                   child: Image.network(
                     coffee["image"]!,
                     fit: BoxFit.cover,
-                    width: double.infinity,
                   ),
                 ),
                 Padding(
@@ -83,17 +85,21 @@ class GaleryCoffeScreem extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    coffee["desc"]!,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.grey[600],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        coffee["desc"]!,
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 8),
               ],
             ),
           );

@@ -178,6 +178,9 @@ class AuthService with ChangeNotifier {
 
   Future<void> changeName({required String name, required int id}) async {
     try {
+      if (name.isEmpty) {
+        return;
+      }
       Response response = await apiService.patchApi(
         path: '${APIpath.changeName}/$id',
         headers: {'Authorization': 'Bearer $token'},

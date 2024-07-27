@@ -154,25 +154,29 @@ class _MerchMenuState extends State<MerchMenu> {
                       ),
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceEvenly,
+                    runAlignment: WrapAlignment.spaceEvenly,
+                    direction: Axis.vertical,
                     children: [
                       MyButton(
-                          child: const Text('Riwayat Pesanan jualan',
-                              style: TextStyle(color: Colors.white)),
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(
-                              builder: (context) {
-                                return UserHistoryScreen();
-                              },
-                            ));
-                          }),
+                        child: const Text('Riwayat',
+                            style: TextStyle(color: Colors.white)),
+                        onPressed: () {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) {
+                              return UserHistoryScreen();
+                            },
+                          ));
+                        },
+                      ),
                       MyButton(
-                          child: const Text('Perbarui Informasi',
-                              style: TextStyle(color: Colors.white)),
-                          onPressed: () {
-                            showDialogMerch();
-                          }),
+                        child: const Text('Perbarui Informasi',
+                            style: TextStyle(color: Colors.white)),
+                        onPressed: () {
+                          _MerchMenuState().showDialogMerch();
+                        },
+                      ),
                     ],
                   ),
                 ),
