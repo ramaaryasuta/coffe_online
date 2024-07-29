@@ -1,4 +1,5 @@
 import 'package:coffeonline/screens/home/UI/user_riwayat.dart';
+import 'package:coffeonline/screens/home/provider/coffee_service.dart';
 import 'package:coffeonline/screens/home/widgets/button_order.dart';
 import 'package:coffeonline/screens/home/widgets/merch_map.dart';
 import 'package:coffeonline/screens/home/widgets/merch_order.dart';
@@ -24,6 +25,8 @@ class MerchMenu extends StatefulWidget {
 class _MerchMenuState extends State<MerchMenu> {
   TextEditingController stockController = TextEditingController();
   TextEditingController priceController = TextEditingController();
+  List<String> selectedCoffeeNames = [];
+  List<int> selectedCoffeeIds = [];
   bool isRequestedOrder = false;
   OrderResponse? order;
   OrderResponse? orderPrev;
@@ -33,48 +36,9 @@ class _MerchMenuState extends State<MerchMenu> {
   bool _serviceEnabled = false;
   LocationPermission _permission = LocationPermission.denied;
 
-  final List<Map<String, String>> coffeeList = [
-    {
-      "image":
-          "https://img.freepik.com/free-photo/fresh-coffee-steams-wooden-table-close-up-generative-ai_188544-8923.jpg",
-      "coffee_name": "Espresso",
-      "desc": "Kopi dengan rasa penuh, disajikan dalam porsi kecil dan kuat."
-    },
-    {
-      "image":
-          "https://images.unsplash.com/photo-1543256840-0709ad5d3726?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y29mZmVlJTIwcGhvdG9ncmFwaHl8ZW58MHx8MHx8fDA%3D",
-      "coffee_name": "Latte",
-      "desc": "Minuman kopi yang dibuat dengan espresso dan susu yang dikukus."
-    },
-    {
-      "image":
-          "https://somedayilllearn.com/wp-content/uploads/2020/05/cup-of-black-coffee-scaled-720x540.jpeg",
-      "coffee_name": "Cappuccino",
-      "desc": "Minuman kopi berbasis espresso dengan busa susu di atasnya."
-    },
-    {
-      "image":
-          "https://www.allrecipes.com/thmb/Hqro0FNdnDEwDjrEoxhMfKdWfOY=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/21667-easy-iced-coffee-ddmfs-4x3-0093-7becf3932bd64ed7b594d46c02d0889f.jpg",
-      "coffee_name": "Americano",
-      "desc":
-          "Espresso yang dicampur dengan air panas untuk menghasilkan rasa kopi yang lebih ringan."
-    },
-    {
-      "image":
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQXwck4mtr1y1MulgaJWP79_3t4yO57dS0dGw&s",
-      "coffee_name": "Mocha",
-      "desc": "Kombinasi antara kopi, cokelat, dan susu yang dikukus."
-    },
-    {
-      "image":
-          "https://static.scientificamerican.com/sciam/cache/file/4A9B64B5-4625-4635-848AF1CD534EBC1A_source.jpg?w=1200",
-      "coffee_name": "Macchiato",
-      "desc": "Espresso dengan sedikit busa susu di atasnya."
-    }
-  ];
-
   @override
   void dispose() {
+    printLog('Widget disposed');
     stockController.dispose();
     priceController.dispose();
     super.dispose();
@@ -99,9 +63,18 @@ class _MerchMenuState extends State<MerchMenu> {
     );
   }
 
+  void _fetchCoffeeList() async {
+    printLog('fetch coffee list called');
+    final orderService = context.read<CoffeeService>();
+    await orderService.getCoffee();
+    printLog(orderService.coffeeData);
+  }
+
   @override
   void initState() {
     super.initState();
+    printLog("check state");
+    _fetchCoffeeList();
     _fetchOrderHistory();
     _fetchOrderRequest();
     printLog('merch menu init');
@@ -113,6 +86,7 @@ class _MerchMenuState extends State<MerchMenu> {
     final merchProv = context.watch<MerchantService>();
     final userProv = Provider.of<AuthService>(context, listen: true);
     final _orderService = context.watch<OrderService>();
+    final _coffeeService = context.watch<CoffeeService>();
     final socketService = Provider.of<SocketServices>(context, listen: true);
 
     socketService.socket.connect();
@@ -174,7 +148,7 @@ class _MerchMenuState extends State<MerchMenu> {
                         child: const Text('Perbarui Informasi',
                             style: TextStyle(color: Colors.white)),
                         onPressed: () {
-                          _MerchMenuState().showDialogMerch();
+                          showDialogMerch();
                         },
                       ),
                     ],
@@ -211,9 +185,9 @@ class _MerchMenuState extends State<MerchMenu> {
                   margin: const EdgeInsets.symmetric(vertical: 20),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: coffeeList.length,
+                    itemCount: _coffeeService.coffeeData.length,
                     itemBuilder: (context, index) {
-                      final coffee = coffeeList[index];
+                      final coffee = _coffeeService.coffeeData[index];
                       return Container(
                         width: 180.0, // Set the width of each item
                         margin: EdgeInsets.symmetric(horizontal: 4.0),
@@ -231,7 +205,7 @@ class _MerchMenuState extends State<MerchMenu> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(10.0),
                           child: Image.network(
-                            coffee["image"]!,
+                            coffee["image_link"]!,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -281,13 +255,75 @@ class _MerchMenuState extends State<MerchMenu> {
     );
   }
 
+  void _showCoffeeSelectionDialog(BuildContext context, StateSetter setState) {
+    final coffeeService = context.read<CoffeeService>();
+    final coffeeItems = coffeeService.coffeeData;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pilih Kopi'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: coffeeItems.map((coffee) {
+                  final coffeeName = coffee["name"].toString();
+                  final coffeeId = coffee["id"] as int;
+                  final isSelected = selectedCoffeeIds.contains(coffeeId);
+
+                  return CheckboxListTile(
+                    title: Text(coffeeName),
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedCoffeeIds.add(coffeeId);
+                          selectedCoffeeNames.add(coffeeName);
+                        } else {
+                          selectedCoffeeIds.remove(coffeeId);
+                          selectedCoffeeNames.remove(coffeeName);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Tutup'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Notify parent widget of the change
+                setState(() {
+                  // Refresh parent state if needed
+                });
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _showOrderDialog(
     BuildContext context,
     OrderResponse order,
     AuthService userProv,
   ) {
+    if (!mounted) return;
     final _orderService = context.read<OrderService>();
     final merchProv = context.read<MerchantService>();
+
     double lat = 0.0;
     double long = 0.0;
     String formatPrice(double price) {
@@ -315,43 +351,27 @@ class _MerchMenuState extends State<MerchMenu> {
     Future<void> getLocation() async {
       try {
         LoadingDialog.show(context, message: 'Mendapatkan lokasi...');
-        // Periksa layanan lokasi aktif
         bool _serviceEnabled = await Geolocator.isLocationServiceEnabled();
         if (!_serviceEnabled) {
-          // Jika layanan tidak aktif, minta untuk diaktifkan
           _serviceEnabled = await Geolocator.openLocationSettings();
-          if (!_serviceEnabled) {
-            return;
-          }
+          if (!_serviceEnabled) return;
         }
 
-        // Periksa izin lokasi
         LocationPermission _permission = await Geolocator.checkPermission();
         if (_permission == LocationPermission.denied) {
-          // Jika izin belum diberikan, minta izin
           _permission = await Geolocator.requestPermission();
-          if (_permission == LocationPermission.denied) {
-            // Izin ditolak, berikan penanganan khusus di sini
-            // Misalnya, menampilkan pesan atau menavigasi ke pengaturan aplikasi
-            return;
-          }
+          if (_permission == LocationPermission.denied) return;
         }
 
-        if (_permission == LocationPermission.deniedForever) {
-          // Jika pengguna telah menolak untuk memberikan izin secara permanen
-          // Tindakan lebih lanjut, misalnya memberikan pesan tentang pengaturan aplikasi
-          return;
-        }
+        if (_permission == LocationPermission.deniedForever) return;
 
-        // Jika izin sudah diberikan, lanjutkan ke pengambilan lokasi
         if (_permission == LocationPermission.whileInUse ||
             _permission == LocationPermission.always) {
           Position position = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           );
-          printLog(
-              'Latitude: ${position.latitude}, Longitude: ${position.longitude}');
-          // Update merchLoc with the obtained position
+
+          if (!mounted) return; // Check if widget is still mounted
           setState(() {
             lat = position.latitude;
             long = position.longitude;
@@ -359,14 +379,14 @@ class _MerchMenuState extends State<MerchMenu> {
           LoadingDialog.hide(context);
         }
       } catch (e) {
-        printLog('Error: $e');
-        LoadingDialog.hide(context);
+        if (mounted) LoadingDialog.hide(context);
       }
     }
 
     getLocation().then((_) => showDialog(
           context: context,
           builder: (BuildContext context) {
+            if (!mounted) return SizedBox.shrink();
             return Dialog(
                 insetPadding: EdgeInsets.all(0),
                 child: Container(
@@ -477,7 +497,7 @@ class _MerchMenuState extends State<MerchMenu> {
                 ));
           },
         ).then((value) => {
-              merchProv.decrementCount(),
+              if (mounted) {merchProv.decrementCount()}
             }));
   }
 
@@ -486,34 +506,46 @@ class _MerchMenuState extends State<MerchMenu> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Perbarui Merchant Info'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: stockController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Stock',
-              ),
-            ),
-            TextField(
-              controller: priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Harga Satuan',
-              ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            MyButton(
-              child: const Text('Perbarui Data & Lokasi',
-                  style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                updateMerchInfo().then((value) => Navigator.pop(context));
-              },
-            )
-          ],
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: stockController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Stock',
+                  ),
+                ),
+                TextField(
+                  controller: priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Harga Satuan',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                MyButton(
+                  child: const Text('Pilih Kopi',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    _showCoffeeSelectionDialog(context, setState);
+                  },
+                ),
+                const SizedBox(height: 10),
+                Text('Kopi Terpilih: ${selectedCoffeeNames.join(', ')}'),
+                const SizedBox(height: 10),
+                MyButton(
+                  child: const Text('Perbarui Data & Lokasi',
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    updateMerchInfo().then((value) => Navigator.pop(context));
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -523,44 +555,32 @@ class _MerchMenuState extends State<MerchMenu> {
     final provider = context.read<MerchantService>();
     final authProv = context.read<AuthService>();
     LoadingDialog.show(context, message: 'Memuat Data...');
+
     try {
-      // Periksa layanan lokasi aktif
+      if (!mounted) return;
+
       _serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!_serviceEnabled) {
-        // Jika layanan tidak aktif, minta untuk diaktifkan
         _serviceEnabled = await Geolocator.openLocationSettings();
-        if (!_serviceEnabled) {
-          return;
-        }
+        if (!_serviceEnabled) return;
       }
 
-      // Periksa izin lokasi
       _permission = await Geolocator.checkPermission();
       if (_permission == LocationPermission.denied) {
-        // Jika izin belum diberikan, minta izin
         _permission = await Geolocator.requestPermission();
-        if (_permission == LocationPermission.denied) {
-          // Izin ditolak, berikan penanganan khusus di sini
-          // Misalnya, menampilkan pesan atau menavigasi ke pengaturan aplikasi
-          return;
-        }
+        if (_permission == LocationPermission.denied) return;
       }
 
-      if (_permission == LocationPermission.deniedForever) {
-        // Jika pengguna telah menolak untuk memberikan izin secara permanen
-        // Tindakan lebih lanjut, misalnya memberikan pesan tentang pengaturan aplikasi
-        return;
-      }
+      if (_permission == LocationPermission.deniedForever) return;
 
-      // Jika izin sudah diberikan, lanjutkan ke pengambilan lokasi
       if (_permission == LocationPermission.whileInUse ||
           _permission == LocationPermission.always) {
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high,
         );
-        printLog(
-            'Latitude: ${position.latitude}, Longitude: ${position.longitude}');
-        // Lakukan sesuatu dengan posisi yang diperoleh
+
+        if (!mounted) return;
+
         await provider.updateMerchInfo(
           id: authProv.userData!.merchId.toString(),
           token: authProv.token,
@@ -568,11 +588,17 @@ class _MerchMenuState extends State<MerchMenu> {
           longitude: position.longitude.toString(),
           stock: stockController.text,
           price: priceController.text,
+          coffeeID: selectedCoffeeIds,
         );
-        LoadingDialog.hide(context);
+
+        if (mounted) {
+          LoadingDialog.hide(context);
+        }
       }
     } catch (e) {
-      printLog('Error: $e');
+      if (mounted) {
+        LoadingDialog.hide(context);
+      }
     }
   }
 }

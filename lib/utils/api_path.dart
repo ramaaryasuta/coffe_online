@@ -23,4 +23,7 @@ class APIpath {
   static const String getMerchantById = '/api/merchant'; // need param ID
   static const String updateMerchantInfo =
       '/api/updatemerchant'; // need param ID
+
+  static const String getCoffee = '/api/coffee';
+  static const String deleteCoffee = '/api/merchant/deleteCoffee';
 }

@@ -30,6 +30,7 @@ class OrderService with ChangeNotifier {
   String? maxPrice;
   String? address;
   String? note;
+  List<int> coffeeID = [];
 
   Future<void> saveRequest({required String id}) async {
     orderRequestId = int.parse(id);
@@ -77,11 +78,13 @@ class OrderService with ChangeNotifier {
     required String maxPrice,
     required String address,
     required String note,
+    required List<int> coffeeID,
   }) {
     this.amountCoffe = amountCoffe;
     this.maxPrice = maxPrice;
     this.address = address;
     this.note = note;
+    this.coffeeID = coffeeID;
     printLog('Succes');
     notifyListeners();
   }
@@ -99,8 +102,10 @@ class OrderService with ChangeNotifier {
     required String address,
     required String note,
     required int userId,
+    required List<int> coffeeID,
   }) async {
     try {
+      printLog('coffee: $coffeeID');
       Response response = await apiService.postApi(
         path: APIpath.createOrder,
         headers: {'Authorization': 'Bearer $token'},
@@ -111,6 +116,7 @@ class OrderService with ChangeNotifier {
           "address_detail": note,
           "latitude_buyer": myLat,
           "longitude_buyer": myLong,
+          "coffeeID": coffeeID,
           "userID": userId
         },
       );

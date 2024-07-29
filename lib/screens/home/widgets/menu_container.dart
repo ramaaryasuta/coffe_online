@@ -1,6 +1,8 @@
 import 'package:coffeonline/screens/home/UI/user_riwayat.dart';
+import 'package:coffeonline/screens/home/provider/coffee_service.dart';
 import 'package:coffeonline/screens/home/subview/galery_coffe.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../styles/colors.dart';
 
@@ -34,11 +36,16 @@ class MenuContainer extends StatelessWidget {
           MenuButton(
             icon: Icons.coffee_outlined,
             title: 'Kopi menu',
-            onTap: () {
+            onTap: () async {
+              final coffeeService =
+                  Provider.of<CoffeeService>(context, listen: false);
+              await coffeeService.getCoffee(); // Fetch data
+
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return const GaleryCoffeScreem();
+                    return GaleryCoffeScreem(
+                        coffeeList: coffeeService.coffeeData);
                   },
                 ),
               );

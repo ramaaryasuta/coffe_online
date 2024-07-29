@@ -90,24 +90,30 @@ class MerchantService with ChangeNotifier {
     }
   }
 
-  Future<void> updateMerchInfo({
-    required String id,
-    required String token,
-    required String latitude,
-    required String longitude,
-    required String? stock,
-    required String? price,
-    // param kirim file untuk avatar
-  }) async {
+  Future<void> updateMerchInfo(
+      {required String id,
+      required String token,
+      required String latitude,
+      required String longitude,
+      required String? stock,
+      required String? price,
+      required List<int>? coffeeID}) async {
     try {
+      if (coffeeID != null && coffeeID.isNotEmpty) {
+        await apiService.postApi(
+            path: '${APIpath.deleteCoffee}',
+            headers: {'Authorization': 'Bearer $token'},
+            data: {"merchantID": id});
+      }
       Response response = await apiService.postApi(
         path: '${APIpath.updateMerchantInfo}/$id',
         headers: {'Authorization': 'Bearer $token'},
         data: {
           "latitude": latitude,
           "longitude": longitude,
-          "stock": stock!.isEmpty ? null : stock,
-          "price": price!.isEmpty ? null : price,
+          if (stock != null && stock.isNotEmpty) 'stock': stock,
+          if (price != null && price.isNotEmpty) 'price': price,
+          if (coffeeID != null && coffeeID.isNotEmpty) 'coffeeID': coffeeID,
         },
       );
 

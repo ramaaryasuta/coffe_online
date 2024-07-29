@@ -1,3 +1,4 @@
+import 'package:coffeonline/screens/home/provider/coffee_service.dart';
 import 'package:coffeonline/screens/home/provider/order_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +22,8 @@ class _OrderButtonState extends State<OrderButton> {
   final budgetController = TextEditingController();
   final addressController = TextEditingController();
   final noteController = TextEditingController();
+  List<String> selectedCoffeeNames = [];
+  List<int> selectedCoffeeIds = [];
 
   @override
   void dispose() {
@@ -57,6 +60,86 @@ class _OrderButtonState extends State<OrderButton> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showCoffeeSelectionDialog(BuildContext context,
+      Function(List<String>, List<int>) onSelectionChanged) {
+    final coffeeService = context.read<CoffeeService>();
+
+    if (coffeeService.coffeeData.isEmpty) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Pilih Kopi'),
+            content: const Center(child: CircularProgressIndicator()),
+          );
+        },
+      );
+
+      coffeeService.getCoffee().then((_) {
+        Navigator.of(context).pop(); // Close the loading dialog
+        _showCoffeeSelectionDialog(
+            context, onSelectionChanged); // Reopen the dialog
+      });
+
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pilih Kopi'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter dialogSetState) {
+              final coffeeItems = coffeeService.coffeeData;
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: coffeeItems.map((coffee) {
+                  final coffeeName = coffee["name"].toString();
+                  final coffeeId = coffee["id"] as int;
+                  final isSelected = selectedCoffeeIds.contains(coffeeId);
+
+                  return CheckboxListTile(
+                    title: Text(coffeeName),
+                    value: isSelected,
+                    onChanged: (bool? value) {
+                      dialogSetState(() {
+                        if (value == true) {
+                          selectedCoffeeIds.add(coffeeId);
+                          selectedCoffeeNames.add(coffeeName);
+                        } else {
+                          selectedCoffeeIds.remove(coffeeId);
+                          selectedCoffeeNames.remove(coffeeName);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Tutup'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Notify the parent widget of the change
+                onSelectionChanged(selectedCoffeeNames, selectedCoffeeIds);
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -97,7 +180,7 @@ class _OrderButtonState extends State<OrderButton> {
                           IconButton(
                             onPressed: () => Navigator.pop(context),
                             icon: const Icon(Icons.close),
-                          )
+                          ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -107,9 +190,7 @@ class _OrderButtonState extends State<OrderButton> {
                         decoration: InputDecoration(
                           labelText: 'Jumlah Pesanan Kopi',
                           hintText: 'Masukan Jumlah pesanan',
-                          hintStyle: const TextStyle(
-                            color: Colors.grey,
-                          ),
+                          hintStyle: const TextStyle(color: Colors.grey),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -128,6 +209,24 @@ class _OrderButtonState extends State<OrderButton> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      MyButton(
+                        child: const Text('Pilih Kopi',
+                            style: TextStyle(color: Colors.white)),
+                        onPressed: () {
+                          _showCoffeeSelectionDialog(
+                            context,
+                            (selectedNames, selectedIds) {
+                              setState(() {
+                                selectedCoffeeNames = selectedNames;
+                                selectedCoffeeIds = selectedIds;
+                              });
+                            },
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      Text('Kopi Terpilih: ${selectedCoffeeNames.join(', ')}'),
+                      const SizedBox(height: 10),
                       TextField(
                         controller: addressController,
                         keyboardType: TextInputType.streetAddress,
@@ -167,9 +266,7 @@ class _OrderButtonState extends State<OrderButton> {
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
-                                ?.copyWith(
-                                  color: Colors.white,
-                                ),
+                                ?.copyWith(color: Colors.white),
                           ),
                         ),
                       ),
@@ -192,6 +289,7 @@ class _OrderButtonState extends State<OrderButton> {
       maxPrice: budgetController.text,
       address: addressController.text,
       note: noteController.text,
+      coffeeID: selectedCoffeeIds,
     );
     try {
       await provider.createOrder(
@@ -200,6 +298,7 @@ class _OrderButtonState extends State<OrderButton> {
         maxPrice: budgetController.text,
         address: addressController.text,
         note: noteController.text,
+        coffeeID: selectedCoffeeIds,
         userId: userProv.userId!,
       );
     } catch (e) {
