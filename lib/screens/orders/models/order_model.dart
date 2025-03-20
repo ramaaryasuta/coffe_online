@@ -11,6 +11,7 @@ class OrderResponse {
   dynamic merchantId; // Use dynamic because it can be null
   DateTime updatedAt;
   DateTime createdAt;
+  User user;
 
   OrderResponse({
     required this.status,
@@ -25,6 +26,7 @@ class OrderResponse {
     this.merchantId,
     required this.updatedAt,
     required this.createdAt,
+    required this.user,
   });
 
   // Parsing JSON to Dart object
@@ -36,12 +38,13 @@ class OrderResponse {
       totalPrice: json['totalPrice'],
       address: json['address'],
       addressDetail: json['address_detail'],
-      latitudeBuyer: json['latitude_buyer'].toDouble(),
-      longitudeBuyer: json['longitude_buyer'].toDouble(),
+      latitudeBuyer: double.parse(json['latitude_buyer']),
+      longitudeBuyer: double.parse(json['longitude_buyer']),
       userId: json['userID'],
       merchantId: json['merchantID'],
       updatedAt: DateTime.parse(json['updatedAt']),
       createdAt: DateTime.parse(json['createdAt']),
+      user: User.fromJson(json['User']),
     );
   }
 
@@ -60,6 +63,26 @@ class OrderResponse {
       'merchantID': merchantId,
       'updatedAt': updatedAt.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
+    };
+  }
+}
+
+class User {
+  String name;
+
+  User({
+    required this.name,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      name: json['name'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
     };
   }
 }

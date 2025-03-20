@@ -1,8 +1,7 @@
-import 'package:coffeonline/screens/home-merchant/merchant_screen.dart';
-import 'package:coffeonline/screens/profile/profile_screen.dart';
+import 'package:coffeonline/screens/home/UI/user_riwayat.dart';
+import 'package:coffeonline/screens/home/subview/galery_coffe.dart';
 import 'package:flutter/material.dart';
 
-import '../../login/login_screen.dart';
 import '../../../styles/colors.dart';
 
 class MenuContainer extends StatelessWidget {
@@ -30,16 +29,16 @@ class MenuContainer extends StatelessWidget {
       child: Wrap(
         spacing: 10,
         runSpacing: 10,
-        alignment: WrapAlignment.spaceBetween,
+        alignment: WrapAlignment.spaceEvenly,
         children: [
           MenuButton(
-            icon: Icons.coffee_rounded,
-            title: 'Merchant',
+            icon: Icons.coffee_outlined,
+            title: 'Kopi menu',
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) {
-                    return const MerchantScreen();
+                    return const GaleryCoffeScreem();
                   },
                 ),
               );
@@ -48,15 +47,14 @@ class MenuContainer extends StatelessWidget {
           MenuButton(
             icon: Icons.history_rounded,
             title: 'Riwayat',
-            onTap: () {},
-          ),
-          MenuButton(
-            icon: Icons.person_2_rounded,
-            title: 'Profil',
             onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return const ProfileScreen();
-              }));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const UserHistoryScreen();
+                  },
+                ),
+              );
             },
           ),
         ],

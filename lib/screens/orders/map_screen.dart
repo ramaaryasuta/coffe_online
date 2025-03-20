@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'widgets/check_order.dart';
 
+// ignore: must_be_immutable
 class MapScreen extends StatefulWidget {
   MapScreen({
     super.key,
@@ -123,7 +124,9 @@ class _MapScreenState extends State<MapScreen> {
             markers: _markers,
             polylines: _polyLines,
           ),
-          const CheckOrderButton()
+          CheckOrderButton(
+            dataOngoing: widget.ongoingData,
+          )
         ],
       ),
     );
